@@ -9,6 +9,7 @@ import org.nthuli_shop.nthuli_shop.entity.Shoes;
 import org.nthuli_shop.nthuli_shop.enums.GenderEnum;
 import org.nthuli_shop.nthuli_shop.enums.ShoeMaterialEnum;
 import org.nthuli_shop.nthuli_shop.repository.CategoryRepository;
+import org.nthuli_shop.nthuli_shop.repository.ProductImageRepository;
 import org.nthuli_shop.nthuli_shop.repository.ShoesRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,11 +23,13 @@ public class ShoeService {
     private final ShoesRepository shoesRepository;
     private final CategoryRepository categoryRepository;
     private final FileStorageService fileStorageService;
+    private final ProductImageRepository productImageRepository;
 
-    public ShoeService(ShoesRepository shoesRepository, CategoryRepository categoryRepository, FileStorageService fileStorageService) {
+    public ShoeService(ShoesRepository shoesRepository, CategoryRepository categoryRepository, FileStorageService fileStorageService, ProductImageRepository productImageRepository) {
         this.shoesRepository = shoesRepository;
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
+        this.productImageRepository = productImageRepository;
     }
 
     // get all shoes
@@ -159,5 +162,35 @@ public class ShoeService {
                 .toList()
         );
         return response;
+    }
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+    // ✅ ADD IMAGES
+    public void addImages(Long productId, List<MultipartFile> files) {
+        Shoes shoe = shoesRepository.findById(productId).orElseThrow();
+
+        for (MultipartFile file : files) {
+            String url = fileStorageService.saveFile(file);
+
+            ProductImage img = new ProductImage();
+            img.setProduct(shoe);
+            img.setImageUrl(url);
+            img.setPrimary(false);
+
+            shoe.getImages().add(img);
+        }
+
+        shoesRepository.save(shoe);
+    }
+
+    // ✅ DELETE IMAGE
+    public void deleteImage(Long imageId) {
+        // productRepo.findAll().forEach(p ->
+        //         p.getImages().removeIf(img -> img.getId().equals(imageId))
+        // );
+        ProductImage image = productImageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("Image not found"));
+        fileStorageService.deleteFile(image.getImageUrl()); // Delete from disk
+        productImageRepository.delete(image); // Delete from DB
     }
 }
