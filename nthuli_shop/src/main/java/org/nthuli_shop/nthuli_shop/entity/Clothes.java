@@ -7,6 +7,8 @@ import org.nthuli_shop.nthuli_shop.enums.ClothesMaterialEnum;
 import org.nthuli_shop.nthuli_shop.enums.ClothesTypeEnum;
 import org.nthuli_shop.nthuli_shop.enums.GenderEnum;
 
+import java.util.List;
+
 @Entity
 public class Clothes extends Product{
     //
@@ -24,8 +26,8 @@ public class Clothes extends Product{
     public Clothes() {
     }
 
-    public Clothes(String name, String description, Double price, Category category, GenderEnum gender, ClothesMaterialEnum clotheMaterial, ClothesTypeEnum clotheType) {
-        super(name, description, price, category);
+    public Clothes(String name, String description, Double price, Category category, List<ProductImage> images, GenderEnum gender, ClothesMaterialEnum clotheMaterial, ClothesTypeEnum clotheType) {
+        super(name, description, price, category, images);
         this.gender = gender;
         this.clotheMaterial = clotheMaterial;
         this.clotheType = clotheType;

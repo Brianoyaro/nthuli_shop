@@ -5,6 +5,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import org.nthuli_shop.nthuli_shop.enums.KitchenApplianceFunctionEnum;
 
+import java.util.List;
+
 @Entity
 public class KitchenAppliance extends Product{
     //
@@ -17,10 +19,10 @@ public class KitchenAppliance extends Product{
     public KitchenAppliance() {
     }
 
-    public KitchenAppliance(String name, String description, Double price, Category category, KitchenApplianceFunctionEnum applianceFunction, Double wattage) {
-        super(name, description, price, category);
-        this.applianceFunction = applianceFunction;
+    public KitchenAppliance(String name, String description, Double price, Category category, List<ProductImage> images, Double wattage, KitchenApplianceFunctionEnum applianceFunction) {
+        super(name, description, price, category, images);
         this.wattage = wattage;
+        this.applianceFunction = applianceFunction;
     }
 
     public Double getWattage() {

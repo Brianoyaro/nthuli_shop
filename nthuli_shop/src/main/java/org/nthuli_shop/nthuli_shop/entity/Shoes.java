@@ -6,6 +6,8 @@ import jakarta.persistence.Enumerated;
 import org.nthuli_shop.nthuli_shop.enums.GenderEnum;
 import org.nthuli_shop.nthuli_shop.enums.ShoeMaterialEnum;
 
+import java.util.List;
+
 @Entity
 public class Shoes extends Product{
     //
@@ -18,8 +20,8 @@ public class Shoes extends Product{
     public Shoes() {
     }
 
-    public Shoes(String name, String description, Double price, Category category, GenderEnum gender, ShoeMaterialEnum material) {
-        super(name, description, price, category);
+    public Shoes(String name, String description, Double price, Category category, List<ProductImage> images, GenderEnum gender, ShoeMaterialEnum material) {
+        super(name, description, price, category, images);
         this.gender = gender;
         this.material = material;
     }

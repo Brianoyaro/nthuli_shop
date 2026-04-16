@@ -6,6 +6,8 @@ import jakarta.persistence.Enumerated;
 import org.nthuli_shop.nthuli_shop.enums.FurnitureMaterialEnum;
 import org.nthuli_shop.nthuli_shop.enums.FurnitureTypeEnum;
 
+import java.util.List;
+
 @Entity
 public class Furniture extends Product{
     //
@@ -18,10 +20,10 @@ public class Furniture extends Product{
     public Furniture() {
     }
 
-    public Furniture(String name, String description, Double price, Category category, FurnitureMaterialEnum furnitureMaterial, FurnitureTypeEnum furnitureType) {
-        super(name, description, price, category);
-        this.furnitureMaterial = furnitureMaterial;
+    public Furniture(String name, String description, Double price, Category category, List<ProductImage> images, FurnitureTypeEnum furnitureType, FurnitureMaterialEnum furnitureMaterial) {
+        super(name, description, price, category, images);
         this.furnitureType = furnitureType;
+        this.furnitureMaterial = furnitureMaterial;
     }
 
     public FurnitureMaterialEnum getFurnitureMaterial() {
