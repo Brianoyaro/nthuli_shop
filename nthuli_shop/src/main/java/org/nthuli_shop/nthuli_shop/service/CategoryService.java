@@ -7,6 +7,7 @@ import org.nthuli_shop.nthuli_shop.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -33,6 +34,13 @@ public class CategoryService {
 
     // Create category
     public CategoryResponse createCategory(CreateCategoryRequest request) {
+        // check if a similar category already exists in the database
+        String categoryName = request.getName();
+        Optional<Category> existingCategory = categoryRepository.findByName(categoryName);
+        if (existingCategory.isPresent()) {
+            throw new RuntimeException("Category exists!");
+        }
+
         Category category = new Category(request.getName());
         return mapToResponse(category);
     }

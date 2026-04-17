@@ -1,20 +1,33 @@
 package org.nthuli_shop.nthuli_shop.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-    // creating a product
     @GetMapping
-    public static void getProducts() {
-        //
+    public static void getAllProducts() {
+        // get all products
     }
 
-    // updating a product
-    // getting all products
-    // getting a specific product
-    // deleting a product
+    @GetMapping("/{id}")
+    public void getProduct(@RequestParam Long id) {
+        //get a product
+    }
+
+    @PostMapping("/create")
+    public void createProduct() {
+        // create with images
+    }
+
+    @PutMapping("/{id}")
+    public void updateProduct() {
+        // update a product
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProduct() {
+        // delete a product
+    }
+
 }
