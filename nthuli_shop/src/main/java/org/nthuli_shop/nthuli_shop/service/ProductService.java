@@ -134,7 +134,7 @@ public class ProductService {
         product.setCategory(category);
 
         product.setWattage(request.getWattage());
-        product.setApplianceFunction(request.getApplianceFunction());
+        product.setApplianceFunction(KitchenApplianceFunctionEnum.valueOf(request.getApplianceFunction()));
 
         return product;
     }
@@ -161,7 +161,77 @@ public class ProductService {
     //-------------------------------------------------------------------------------------------------------------
 
     // update a product
-
+    public ProductResponseDto updateProduct(Long prodId, ProductRequestDto request, List<MultipartFile> images) {
+        Product product = productRepository.findById(prodId).orElseThrow(() -> new RuntimeException("product to update does not exist"));
+        // update images if provided
+        attachImages(product, images, -1);
+        //if (request.getName() != null && !request.getName().trim().isEmpty())************************************************************
+        // update name, description, price, category_id, product_type
+        if (request.getName() != null && !request.getName().trim().isEmpty()){
+            product.setName(request.getName());
+        }
+        if (request.getDescription() != null && !request.getDescription().trim().isEmpty()){
+            product.setDescription(request.getDescription());
+        }
+        if (!request.getPrice().isNaN()){
+            product.setPrice(request.getPrice());
+        }
+        if (request.getType() != null && !request.getType().trim().isEmpty()){
+            product.setType(ProductType.valueOf(request.getType()));
+        }
+        if (request.getCategoryId() != null) {
+            Category newCategory = getCategory(request.getCategoryId());
+            product.setCategory(newCategory);
+        }
+        //################33
+        switch(product.getType()) {
+            case ProductType.SHOES -> {
+                //
+                request = (ShoeRequestDto) request;
+                if (((ShoeRequestDto) request).getGender() != null && !((ShoeRequestDto) request).getGender().trim().isEmpty()) {
+                    product.setGender(GenderEnum.valueOf(((ShoeRequestDto) request).getGender()));
+                }
+                if (((ShoeRequestDto) request).getMaterial() != null && !((ShoeRequestDto) request).getMaterial().trim().isEmpty()) {
+                    product.setMaterial(ShoeMaterialEnum.valueOf(((ShoeRequestDto) request).getMaterial()));
+                }
+            }
+            case ProductType.KITCHEN_APPLIANCE -> {
+                //
+                request = (KitchenApplianceRequestDto) request;
+                if (((KitchenApplianceRequestDto) request).getWattage() != null) {
+                    product.setWattage(((KitchenApplianceRequestDto) request).getWattage());
+                }
+                if (((KitchenApplianceRequestDto) request).getApplianceFunction() != null && !((KitchenApplianceRequestDto) request).getApplianceFunction().trim().isEmpty()) {
+                    product.setApplianceFunction(KitchenApplianceFunctionEnum.valueOf(((KitchenApplianceRequestDto) request).getApplianceFunction()));
+                }
+            }
+            case ProductType.FURNITURE -> {
+                //
+                request = (FurnitureRequestDto) request;
+                if (((FurnitureRequestDto) request).getFurnitureMaterial() != null && !(((FurnitureRequestDto) request).getFurnitureMaterial().trim().isEmpty())) {
+                    product.setFurnitureMaterial(FurnitureMaterialEnum.valueOf(((FurnitureRequestDto) request).getFurnitureMaterial()));
+                }
+                if (((FurnitureRequestDto) request).getFurnitureType() != null && !(((FurnitureRequestDto) request).getFurnitureType().trim().isEmpty())) {
+                    product.setFurnitureType(FurnitureTypeEnum.valueOf(((FurnitureRequestDto) request).getFurnitureType()));
+                }
+            }
+            case ProductType.CLOTHES -> {
+                //
+                request = (ClothesRequestDto) request;
+                if (((ClothesRequestDto) request).getClotheGender() != null && !(((ClothesRequestDto) request).getClotheGender().trim().isEmpty())) {
+                    product.setClotheGender(GenderEnum.valueOf(((ClothesRequestDto) request).getClotheGender()));
+                }
+                if (((ClothesRequestDto) request).getClotheMaterial() != null && !(((ClothesRequestDto) request).getClotheMaterial().trim().isEmpty())) {
+                    product.setClotheMaterial(ClothesMaterialEnum.valueOf(((ClothesRequestDto) request).getClotheMaterial()));
+                }
+                if (((ClothesRequestDto) request).getClotheType() != null && !(((ClothesRequestDto) request).getClotheType().trim().isEmpty())){
+                    product.setClotheType(ClothesTypeEnum.valueOf(((ClothesRequestDto) request).getClotheType()));
+                }
+            }
+        }
+        //#########################3
+        return mapToResponse(product);
+    }
 
     //---------------------------------------------------------------------------------------
     // delete a product

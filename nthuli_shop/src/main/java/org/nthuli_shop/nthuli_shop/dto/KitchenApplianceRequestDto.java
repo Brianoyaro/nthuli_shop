@@ -6,9 +6,9 @@ import org.nthuli_shop.nthuli_shop.enums.ProductType;
 
 public class KitchenApplianceRequestDto extends ProductRequestDto {
     private Double wattage;
-    private KitchenApplianceFunctionEnum applianceFunction;
+    private String applianceFunction;
 
-    public KitchenApplianceRequestDto(String name, ProductType type, Double price, String description, Long categoryId, Double wattage, KitchenApplianceFunctionEnum applianceFunction) {
+    public KitchenApplianceRequestDto(String name, String type, Double price, String description, Long categoryId, Double wattage, String applianceFunction) {
         super(name, type, price, description, categoryId);
         this.wattage = wattage;
         this.applianceFunction = applianceFunction;
@@ -22,11 +22,11 @@ public class KitchenApplianceRequestDto extends ProductRequestDto {
         this.wattage = wattage;
     }
 
-    public KitchenApplianceFunctionEnum getApplianceFunction() {
+    public String getApplianceFunction() {
         return applianceFunction;
     }
 
-    public void setApplianceFunction(KitchenApplianceFunctionEnum applianceFunction) {
+    public void setApplianceFunction(String applianceFunction) {
         this.applianceFunction = applianceFunction;
     }
 }
