@@ -1,0 +1,32 @@
+package org.nthuli_shop.nthuli_shop.dto;
+
+
+import org.nthuli_shop.nthuli_shop.enums.KitchenApplianceFunctionEnum;
+import org.nthuli_shop.nthuli_shop.enums.ProductType;
+
+public class KitchenApplianceRequestDto extends ProductRequestDto {
+    private Double wattage;
+    private KitchenApplianceFunctionEnum applianceFunction;
+
+    public KitchenApplianceRequestDto(String name, ProductType type, Double price, String description, Long categoryId, Double wattage, KitchenApplianceFunctionEnum applianceFunction) {
+        super(name, type, price, description, categoryId);
+        this.wattage = wattage;
+        this.applianceFunction = applianceFunction;
+    }
+
+    public Double getWattage() {
+        return wattage;
+    }
+
+    public void setWattage(Double wattage) {
+        this.wattage = wattage;
+    }
+
+    public KitchenApplianceFunctionEnum getApplianceFunction() {
+        return applianceFunction;
+    }
+
+    public void setApplianceFunction(KitchenApplianceFunctionEnum applianceFunction) {
+        this.applianceFunction = applianceFunction;
+    }
+}

@@ -1,7 +1,7 @@
 package org.nthuli_shop.nthuli_shop.controller;
 
-import org.nthuli_shop.nthuli_shop.dto.CategoryResponse;
-import org.nthuli_shop.nthuli_shop.dto.CreateCategoryRequest;
+import org.nthuli_shop.nthuli_shop.dto_old.CategoryResponse;
+import org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequest;
 import org.nthuli_shop.nthuli_shop.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

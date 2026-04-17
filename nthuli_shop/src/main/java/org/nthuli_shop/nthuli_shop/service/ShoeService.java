@@ -1,8 +1,8 @@
 package org.nthuli_shop.nthuli_shop.service;
 
-import org.nthuli_shop.nthuli_shop.dto.CreateShoeRequest;
-import org.nthuli_shop.nthuli_shop.dto.ProductImageResponse;
-import org.nthuli_shop.nthuli_shop.dto.ShoeResponse;
+import org.nthuli_shop.nthuli_shop.dto_old.CreateShoeRequest;
+import org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponse;
+import org.nthuli_shop.nthuli_shop.dto_old.ShoeResponse;
 import org.nthuli_shop.nthuli_shop.entity.Category;
 import org.nthuli_shop.nthuli_shop.entity.ProductImage;
 import org.nthuli_shop.nthuli_shop.entity.Shoes;
@@ -164,33 +164,5 @@ public class ShoeService {
         return response;
     }
 
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
-    // ✅ ADD IMAGES
-    public void addImages(Long productId, List<MultipartFile> files) {
-        Shoes shoe = shoesRepository.findById(productId).orElseThrow();
 
-        for (MultipartFile file : files) {
-            String url = fileStorageService.saveFile(file);
-
-            ProductImage img = new ProductImage();
-            img.setProduct(shoe);
-            img.setImageUrl(url);
-            img.setPrimary(false);
-
-            shoe.getImages().add(img);
-        }
-
-        shoesRepository.save(shoe);
-    }
-
-    // ✅ DELETE IMAGE
-    public void deleteImage(Long imageId) {
-        // productRepo.findAll().forEach(p ->
-        //         p.getImages().removeIf(img -> img.getId().equals(imageId))
-        // );
-        ProductImage image = productImageRepository.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
-        fileStorageService.deleteFile(image.getImageUrl()); // Delete from disk
-        productImageRepository.delete(image); // Delete from DB
-    }
 }

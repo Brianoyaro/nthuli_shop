@@ -1,4 +1,4 @@
-package org.nthuli_shop.nthuli_shop.dto;
+package org.nthuli_shop.nthuli_shop.dto_old;
 
 public class CreateCategoryRequest {
     private String name;

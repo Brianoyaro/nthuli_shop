@@ -1,7 +1,7 @@
 package org.nthuli_shop.nthuli_shop.service;
 
-import org.nthuli_shop.nthuli_shop.dto.CategoryResponse;
-import org.nthuli_shop.nthuli_shop.dto.CreateCategoryRequest;
+import org.nthuli_shop.nthuli_shop.dto_old.CategoryResponse;
+import org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequest;
 import org.nthuli_shop.nthuli_shop.entity.Category;
 import org.nthuli_shop.nthuli_shop.repository.CategoryRepository;
 import org.springframework.stereotype.Service;

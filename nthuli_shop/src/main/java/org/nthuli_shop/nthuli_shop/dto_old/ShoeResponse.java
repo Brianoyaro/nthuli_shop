@@ -1,23 +1,38 @@
-package org.nthuli_shop.nthuli_shop.dto;
+package org.nthuli_shop.nthuli_shop.dto_old;
 
-public class CreateShoeRequest {
+import java.util.List;
+
+public class ShoeResponse {
+    //
+    private Long id;
     private String name;
     private String description;
     private Double price;
     private Long categoryId;
     private String gender;
     private String material;
+    private List<ProductImageResponse> images;
 
-    public CreateShoeRequest() {
+    public ShoeResponse() {
     }
 
-    public CreateShoeRequest(String name, String description, Double price, Long categoryId, String gender, String material) {
-        this.name = name;
+    public ShoeResponse(Long id, String description, String name, Double price, String gender, Long categoryId, String material, List<ProductImageResponse> images) {
+        this.id = id;
         this.description = description;
+        this.name = name;
         this.price = price;
-        this.categoryId = categoryId;
         this.gender = gender;
+        this.categoryId = categoryId;
         this.material = material;
+        this.images = images;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -66,5 +81,13 @@ public class CreateShoeRequest {
 
     public void setMaterial(String material) {
         this.material = material;
+    }
+
+    public List<ProductImageResponse> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImageResponse> images) {
+        this.images = images;
     }
 }
