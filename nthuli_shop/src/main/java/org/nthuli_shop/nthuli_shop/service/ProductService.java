@@ -160,12 +160,19 @@ public class ProductService {
     // create ends here
     //-------------------------------------------------------------------------------------------------------------
 
-
     // update a product
+
+
+    //---------------------------------------------------------------------------------------
     // delete a product
-
-
-
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Shoe not found"));
+        // delete its images first
+        product.getImages().forEach(img ->
+                fileStorageService.deleteFile(img.getImageUrl())
+        );
+        productRepository.deleteById(id);
+    }
 
 
     // mapper function section starts here
