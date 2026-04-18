@@ -66,8 +66,8 @@ public class ProductController {
         // create with images
         try {
             ProductRequestDto request = objectMapper.readValue(productJson, ProductRequestDto.class);
-            ProductResponseDto repsonse = productService.createProduct(request, images, primaryIndex);
-            return ResponseEntity.ok(repsonse);
+            ProductResponseDto response = productService.createProduct(request, images, primaryIndex);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
             error.put("Message", e.getMessage());

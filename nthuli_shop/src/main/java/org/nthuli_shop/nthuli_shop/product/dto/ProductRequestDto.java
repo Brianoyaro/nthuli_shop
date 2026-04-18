@@ -1,16 +1,31 @@
 package org.nthuli_shop.nthuli_shop.product.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "type",
+        visible = true
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = ShoeRequestDto.class, name = "SHOES"),
+        @JsonSubTypes.Type(value = FurnitureRequestDto.class, name = "FURNITURE"),
+        @JsonSubTypes.Type(value = KitchenApplianceRequestDto.class, name = "KITCHEN_APPLIANCE"),
+        @JsonSubTypes.Type(value = ClothesRequestDto.class, name = "CLOTHES")
+})
 public class ProductRequestDto {
     @NotBlank(message = "product name is required")
     private String name;
     @NotBlank(message = "product description is required")
     private String description;
-    @NotBlank(message = "product price is required")
+    @NotNull
     private Double price;
-    @NotBlank(message = "product's category is required")
+    @NotNull
     private Long categoryId;
     @NotBlank(message = "product type is required")
     private String type;

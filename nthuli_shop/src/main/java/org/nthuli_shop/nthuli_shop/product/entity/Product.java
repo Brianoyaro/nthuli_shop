@@ -27,7 +27,6 @@ public class Product {
     private List<ProductImage> images;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ProductType type;
 
     // shoe related attributes
