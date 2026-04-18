@@ -1,14 +1,14 @@
 package org.nthuli_shop.nthuli_shop.dto_old;
 
-public class ProductImageResponse {
+public class ProductImageResponseDto {
     private Long id;
     private Boolean isPrimary;
     private String imageUrl;
 
-    public ProductImageResponse() {
+    public ProductImageResponseDto() {
     }
 
-    public ProductImageResponse(Long id, boolean isPrimary, String imageUrl) {
+    public ProductImageResponseDto(Long id, boolean isPrimary, String imageUrl) {
         this.id = id;
         this.isPrimary = isPrimary;
         this.imageUrl = imageUrl;

@@ -1,7 +1,6 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
 
-import org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponse;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
 
 import java.util.List;
@@ -13,13 +12,13 @@ public class ProductResponseDto {
     private Double price;
     private ProductType type;
     private String categoryName;
-    private List<ProductImageResponse> images;
+    private List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images;
 
 
     public ProductResponseDto() {
     }
 
-    public ProductResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String name, List<ProductImageResponse> images) {
+    public ProductResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String name, List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images) {
         this.id = id;
         this.categoryName = categoryName;
         this.type = productType;
@@ -77,11 +76,11 @@ public class ProductResponseDto {
         this.name = name;
     }
 
-    public List<ProductImageResponse> getImages() {
+    public List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> getImages() {
         return images;
     }
 
-    public void setImages(List<ProductImageResponse> images) {
+    public void setImages(List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images) {
         this.images = images;
     }
 }

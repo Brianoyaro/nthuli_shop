@@ -1,9 +1,6 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
-import org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponse;
-import org.nthuli_shop.nthuli_shop.enums.GenderEnum;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
-import org.nthuli_shop.nthuli_shop.enums.ShoeMaterialEnum;
 
 import java.util.List;
 
@@ -15,7 +12,7 @@ public class ShoeResponseDto extends ProductResponseDto {
     public ShoeResponseDto() {
     }
 
-    public ShoeResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String name, String gender, String material, List<ProductImageResponse> images) {
+    public ShoeResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String name, String gender, String material, List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images) {
         super(id, categoryName, productType, price, description, name, images);
         this.gender = gender;
         this.material = material;

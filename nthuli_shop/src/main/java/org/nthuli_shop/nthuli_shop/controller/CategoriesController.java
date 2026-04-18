@@ -1,7 +1,5 @@
 package org.nthuli_shop.nthuli_shop.controller;
 
-import org.nthuli_shop.nthuli_shop.dto_old.CategoryResponse;
-import org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequest;
 import org.nthuli_shop.nthuli_shop.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +20,10 @@ public class CategoriesController {
 
     // create a category
     @PostMapping("/create")
-    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryRequest request) {
+    public ResponseEntity<?> createCategory(@RequestBody org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequestDto request) {
         //
         try {
-            CategoryResponse response = categoryService.createCategory(request);
+            org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto response = categoryService.createCategory(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             // similar category exists in the database
@@ -44,7 +42,7 @@ public class CategoriesController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getCategory(@PathVariable Long id) {
         try {
-            CategoryResponse category = categoryService.getCategory(id);
+            org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto category = categoryService.getCategory(id);
             return ResponseEntity.ok(category);
         } catch (RuntimeException e) {
             // category does not exist in the database
@@ -61,16 +59,16 @@ public class CategoriesController {
 
     // get categories
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
-        List<CategoryResponse> categories =  categoryService.getAllCategories();
+    public ResponseEntity<List<org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto>> getAllCategories() {
+        List<org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto> categories =  categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
     // update a category
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, CreateCategoryRequest request) {
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequestDto request) {
         try {
-            CategoryResponse response = categoryService.updateCategory(id, request);
+            org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto response = categoryService.updateCategory(id, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             // category to update does not exist in the database

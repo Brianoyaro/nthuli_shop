@@ -1,13 +1,13 @@
 package org.nthuli_shop.nthuli_shop.dto_old;
 
-public class CategoryResponse {
+public class CategoryResponseDto {
     private Long id;
     private String name;
 
-    public CategoryResponse() {
+    public CategoryResponseDto() {
     }
 
-    public CategoryResponse(Long id, String name) {
+    public CategoryResponseDto(Long id, String name) {
         this.id = id;
         this.name = name;
     }

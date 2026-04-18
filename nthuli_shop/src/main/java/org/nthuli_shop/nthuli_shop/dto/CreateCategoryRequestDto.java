@@ -1,10 +1,10 @@
 package org.nthuli_shop.nthuli_shop.dto_old;
 
-public class CreateCategoryRequest {
+public class CreateCategoryRequestDto {
     private String name;
 
-    public  CreateCategoryRequest() {}
-    public CreateCategoryRequest(String name) {
+    public CreateCategoryRequestDto() {}
+    public CreateCategoryRequestDto(String name) {
         this.name = name;
     }
 

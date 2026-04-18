@@ -1,7 +1,6 @@
 package org.nthuli_shop.nthuli_shop.service;
 
 import org.nthuli_shop.nthuli_shop.dto.*;
-import org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponse;
 import org.nthuli_shop.nthuli_shop.entity.*;
 import org.nthuli_shop.nthuli_shop.enums.*;
 import org.nthuli_shop.nthuli_shop.repository.CategoryRepository;
@@ -257,7 +256,7 @@ public class ProductService {
         response.setImages(
                 product.getImages().stream()
                         .map(img -> {
-                            ProductImageResponse imageResponse = new ProductImageResponse();
+                            org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto imageResponse = new org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto();
                             imageResponse.setId(img.getId());
                             imageResponse.setImageUrl(img.getImageUrl());
                             imageResponse.setPrimary(img.getPrimary());

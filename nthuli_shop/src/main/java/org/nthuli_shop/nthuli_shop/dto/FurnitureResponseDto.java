@@ -1,8 +1,5 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
-import org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponse;
-import org.nthuli_shop.nthuli_shop.enums.FurnitureMaterialEnum;
-import org.nthuli_shop.nthuli_shop.enums.FurnitureTypeEnum;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
 
 import java.util.List;
@@ -14,7 +11,7 @@ public class FurnitureResponseDto extends ProductResponseDto {
     public FurnitureResponseDto() {
     }
 
-    public FurnitureResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String furnitureName, String furnitureMaterial, String furnitureType, List<ProductImageResponse> images) {
+    public FurnitureResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String furnitureName, String furnitureMaterial, String furnitureType, List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images) {
         super(id, categoryName, productType, price, description, furnitureName, images);
         this.furnitureMaterial = furnitureMaterial;
         this.furnitureType = furnitureType;
