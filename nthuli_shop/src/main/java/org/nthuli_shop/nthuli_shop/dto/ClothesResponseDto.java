@@ -12,7 +12,7 @@ public class ClothesResponseDto extends ProductResponseDto{
     public ClothesResponseDto() {
     }
 
-    public ClothesResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String name, String clotheGender, String clotheMaterial, String clotheType, List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images) {
+    public ClothesResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String name, String clotheGender, String clotheMaterial, String clotheType, List<ProductImageResponseDto> images) {
         super(id, categoryName, productType, price, description, name, images);
         this.clotheGender = clotheGender;
         this.clotheMaterial = clotheMaterial;

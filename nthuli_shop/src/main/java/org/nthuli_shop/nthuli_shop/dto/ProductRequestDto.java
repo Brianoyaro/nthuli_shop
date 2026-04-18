@@ -1,13 +1,19 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
 
+import jakarta.validation.constraints.NotBlank;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
 
 public class ProductRequestDto {
+    @NotBlank(message = "product name is required")
     private String name;
+    @NotBlank(message = "product description is required")
     private String description;
+    @NotBlank(message = "product price is required")
     private Double price;
+    @NotBlank(message = "product's category is required")
     private Long categoryId;
+    @NotBlank(message = "product type is required")
     private String type;
 //    private List<ProductImage> images;
 

@@ -229,6 +229,7 @@ public class ProductService {
             }
         }
         //#########################3
+        productRepository.save(product);
         return mapToResponse(product);
     }
 
@@ -256,7 +257,7 @@ public class ProductService {
         response.setImages(
                 product.getImages().stream()
                         .map(img -> {
-                            org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto imageResponse = new org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto();
+                            ProductImageResponseDto imageResponse = new ProductImageResponseDto();
                             imageResponse.setId(img.getId());
                             imageResponse.setImageUrl(img.getImageUrl());
                             imageResponse.setPrimary(img.getPrimary());

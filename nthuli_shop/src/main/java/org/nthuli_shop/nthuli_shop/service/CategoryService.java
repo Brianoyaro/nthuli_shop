@@ -1,5 +1,7 @@
 package org.nthuli_shop.nthuli_shop.service;
 
+import org.nthuli_shop.nthuli_shop.dto.CategoryResponseDto;
+import org.nthuli_shop.nthuli_shop.dto.CreateCategoryRequestDto;
 import org.nthuli_shop.nthuli_shop.entity.Category;
 import org.nthuli_shop.nthuli_shop.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,7 @@ public class CategoryService {
     }
 
     // get all categories
-    public List<org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto> getAllCategories() {
+    public List<CategoryResponseDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         return categories
                 .stream()
@@ -25,13 +27,13 @@ public class CategoryService {
     }
 
     // get a category
-    public org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto getCategory(Long id) {
+    public CategoryResponseDto getCategory(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
         return mapToResponse(category);
     }
 
     // Create category
-    public org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto createCategory(org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequestDto request) {
+    public CategoryResponseDto createCategory(CreateCategoryRequestDto request) {
         // check if a similar category already exists in the database
         String categoryName = request.getName();
         Optional<Category> existingCategory = categoryRepository.findByName(categoryName);
@@ -39,14 +41,17 @@ public class CategoryService {
             throw new RuntimeException("Category exists!");
         }
 
-        Category category = new Category(request.getName());
+        Category category = new Category();
+        category.setName(request.getName());
+        categoryRepository.save(category);
         return mapToResponse(category);
     }
 
     // update category
-    public org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto updateCategory(Long id, org.nthuli_shop.nthuli_shop.dto_old.CreateCategoryRequestDto request) {
+    public CategoryResponseDto updateCategory(Long id, CreateCategoryRequestDto request) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
         category.setName(request.getName());
+        categoryRepository.save(category);
         return mapToResponse(category);
     }
 
@@ -56,9 +61,9 @@ public class CategoryService {
     }
 
     // mapper
-    private org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto mapToResponse(Category category) {
+    private CategoryResponseDto mapToResponse(Category category) {
         //
-        org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto response = new org.nthuli_shop.nthuli_shop.dto_old.CategoryResponseDto();
+        CategoryResponseDto response = new CategoryResponseDto();
         response.setId(category.getId());
         response.setName(category.getName());
 

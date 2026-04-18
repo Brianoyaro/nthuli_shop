@@ -1,10 +1,13 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
 import org.nthuli_shop.nthuli_shop.enums.ShoeMaterialEnum;
 
 public class ShoeRequestDto extends ProductRequestDto {
+    @NotBlank(message = "shoe gender is requires")
     private String gender;
+    @NotBlank(message = "shoe material is required")
     private String material;
 
     public ShoeRequestDto(String name, String type, Double price, String description, Long categoryId, String gender, String material) {

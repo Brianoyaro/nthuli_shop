@@ -1,4 +1,4 @@
-package org.nthuli_shop.nthuli_shop.dto_old;
+package org.nthuli_shop.nthuli_shop.dto;
 
 public class CategoryResponseDto {
     private Long id;

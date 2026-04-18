@@ -1,5 +1,6 @@
 package org.nthuli_shop.nthuli_shop.controller;
 
+import jakarta.validation.Valid;
 import org.nthuli_shop.nthuli_shop.dto.ProductRequestDto;
 import org.nthuli_shop.nthuli_shop.dto.ProductResponseDto;
 import org.nthuli_shop.nthuli_shop.service.ProductService;
@@ -59,8 +60,8 @@ public class ProductController {
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @RequestPart("product") String productJson,
-            @RequestPart("images") List<MultipartFile > images,
-            @RequestParam(defaultValue = "0") Integer primaryIndex
+            @Valid @RequestPart("images") List<MultipartFile > images,
+            @Valid @RequestParam(defaultValue = "0") Integer primaryIndex
     ) {
         // create with images
         try {
@@ -81,8 +82,8 @@ public class ProductController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProduct(
             @PathVariable Long id,
-            @RequestPart("product") ProductRequestDto productJson,
-            @RequestPart("images") List<MultipartFile> images
+            @Valid  @RequestPart("product") ProductRequestDto productJson,
+            @Valid @RequestPart("images") List<MultipartFile> images
     ) {
         // update a product
         try {

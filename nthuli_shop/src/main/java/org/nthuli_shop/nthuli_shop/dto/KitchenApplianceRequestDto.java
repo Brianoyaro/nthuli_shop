@@ -1,11 +1,14 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
 
+import jakarta.validation.constraints.NotBlank;
 import org.nthuli_shop.nthuli_shop.enums.KitchenApplianceFunctionEnum;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
 
 public class KitchenApplianceRequestDto extends ProductRequestDto {
+    @NotBlank(message = "wattage amount of the kitchen appliance is required")
     private Double wattage;
+    @NotBlank(message = "kitchen appliance function is required")
     private String applianceFunction;
 
     public KitchenApplianceRequestDto(String name, String type, Double price, String description, Long categoryId, Double wattage, String applianceFunction) {

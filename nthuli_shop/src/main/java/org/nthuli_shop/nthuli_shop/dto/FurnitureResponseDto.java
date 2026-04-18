@@ -11,7 +11,7 @@ public class FurnitureResponseDto extends ProductResponseDto {
     public FurnitureResponseDto() {
     }
 
-    public FurnitureResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String furnitureName, String furnitureMaterial, String furnitureType, List<org.nthuli_shop.nthuli_shop.dto_old.ProductImageResponseDto> images) {
+    public FurnitureResponseDto(Long id, String categoryName, ProductType productType, Double price, String description, String furnitureName, String furnitureMaterial, String furnitureType, List<ProductImageResponseDto> images) {
         super(id, categoryName, productType, price, description, furnitureName, images);
         this.furnitureMaterial = furnitureMaterial;
         this.furnitureType = furnitureType;

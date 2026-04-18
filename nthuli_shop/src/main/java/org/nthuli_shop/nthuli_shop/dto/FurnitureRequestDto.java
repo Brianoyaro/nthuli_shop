@@ -1,12 +1,15 @@
 package org.nthuli_shop.nthuli_shop.dto;
 
 
+import jakarta.validation.constraints.NotBlank;
 import org.nthuli_shop.nthuli_shop.enums.FurnitureMaterialEnum;
 import org.nthuli_shop.nthuli_shop.enums.FurnitureTypeEnum;
 import org.nthuli_shop.nthuli_shop.enums.ProductType;
 
 public class FurnitureRequestDto extends ProductRequestDto {
+    @NotBlank(message = "furniture material is required")
     private String furnitureMaterial;
+    @NotBlank(message = "furniture type is required")
     private String furnitureType;
 
     public FurnitureRequestDto(String name, String type, Double price, String description, Long categoryId, String furnitureMaterial, String furnitureType) {
