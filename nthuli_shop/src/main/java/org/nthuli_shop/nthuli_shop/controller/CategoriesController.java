@@ -41,8 +41,8 @@ public class CategoriesController {
     }
 
     // get a category
-    @GetMapping("/{id")
-    public ResponseEntity<?> getCategory(@RequestParam Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCategory(@PathVariable Long id) {
         try {
             CategoryResponse category = categoryService.getCategory(id);
             return ResponseEntity.ok(category);
@@ -60,6 +60,7 @@ public class CategoriesController {
     }
 
     // get categories
+    @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
         List<CategoryResponse> categories =  categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
@@ -67,7 +68,7 @@ public class CategoriesController {
 
     // update a category
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@RequestParam Long id, CreateCategoryRequest request) {
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, CreateCategoryRequest request) {
         try {
             CategoryResponse response = categoryService.updateCategory(id, request);
             return ResponseEntity.ok(response);

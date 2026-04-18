@@ -92,42 +92,42 @@ public class ProductService {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
     }
-    private Shoes createShoeEntity(ShoeRequestDto request) {
+    private Product createShoeEntity(ShoeRequestDto request) {
         Category category = getCategory(request.getCategoryId());
 
-        Shoes shoe = new Shoes();
-        shoe.setName(request.getName());
-        shoe.setDescription(request.getDescription());
-        shoe.setPrice(request.getPrice());
-        shoe.setCategory(category);
+        Product product = new Product();
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setCategory(category);
 
-        shoe.setGender(GenderEnum.valueOf(request.getGender()));
-        shoe.setMaterial(ShoeMaterialEnum.valueOf(request.getMaterial()));
+        product.setGender(GenderEnum.valueOf(request.getGender()));
+        product.setMaterial(ShoeMaterialEnum.valueOf(request.getMaterial()));
 
-        return shoe;
+        return product;
     }
-    private Furniture createFurnitureEntity(FurnitureRequestDto request) {
+    private Product createFurnitureEntity(FurnitureRequestDto request) {
         Category category = getCategory(request.getCategoryId());
 
-        Furniture furniture = new Furniture();
-        furniture.setName(request.getName());
-        furniture.setDescription(request.getDescription());
-        furniture.setPrice(request.getPrice());
-        furniture.setCategory(category);
+        Product product = new Product();
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setCategory(category);
 
-        furniture.setFurnitureMaterial(
+        product.setFurnitureMaterial(
                 FurnitureMaterialEnum.valueOf(request.getFurnitureMaterial())
         );
-        furniture.setFurnitureType(
+        product.setFurnitureType(
                 FurnitureTypeEnum.valueOf(request.getFurnitureType())
         );
 
-        return furniture;
+        return product;
     }
-    private KitchenAppliance createKitchenEntity(KitchenApplianceRequestDto request) {
+    private Product createKitchenEntity(KitchenApplianceRequestDto request) {
         Category category = getCategory(request.getCategoryId());
 
-        KitchenAppliance product = new KitchenAppliance();
+        Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -138,24 +138,24 @@ public class ProductService {
 
         return product;
     }
-    private Clothes createClothesEntity(ClothesRequestDto request) {
+    private Product createClothesEntity(ClothesRequestDto request) {
         Category category = getCategory(request.getCategoryId());
 
-        Clothes clothes = new Clothes();
-        clothes.setName(request.getName());
-        clothes.setDescription(request.getDescription());
-        clothes.setPrice(request.getPrice());
-        clothes.setCategory(category);
+        Product product = new Product();
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setCategory(category);
 
-        clothes.setClotheGender(GenderEnum.valueOf(request.getClotheGender()));
-        clothes.setClotheMaterial(
+        product.setClotheGender(GenderEnum.valueOf(request.getClotheGender()));
+        product.setClotheMaterial(
                 ClothesMaterialEnum.valueOf(request.getClotheMaterial())
         );
-        clothes.setClotheType(
+        product.setClotheType(
                 ClothesTypeEnum.valueOf(request.getClotheType())
         );
 
-        return clothes;
+        return product;
     }
     // create ends here
     //-------------------------------------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ public class ProductService {
     //---------------------------------------------------------------------------------------
     // delete a product
     public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Shoe not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product with that ID not found"));
         // delete its images first
         product.getImages().forEach(img ->
                 fileStorageService.deleteFile(img.getImageUrl())
@@ -267,25 +267,25 @@ public class ProductService {
         );
     }
 
-    private ShoeResponseDto mapShoe(Shoes shoe) {
+    private ShoeResponseDto mapShoe(Product product) {
         ShoeResponseDto response = new ShoeResponseDto();
-        mapBaseProductFields(shoe, response);
+        mapBaseProductFields(product, response);
 
-        response.setGender(shoe.getGender().name());
-        response.setMaterial(shoe.getMaterial().name());
+        response.setGender(product.getGender().name());
+        response.setMaterial(product.getMaterial().name());
 
         return response;
     }
-    private FurnitureResponseDto mapFurniture(Furniture furniture) {
+    private FurnitureResponseDto mapFurniture(Product product) {
         FurnitureResponseDto response = new FurnitureResponseDto();
-        mapBaseProductFields(furniture, response);
+        mapBaseProductFields(product, response);
 
-        response.setFurnitureMaterial(furniture.getFurnitureMaterial().name());
-        response.setFurnitureType(furniture.getFurnitureType().name());
+        response.setFurnitureMaterial(product.getFurnitureMaterial().name());
+        response.setFurnitureType(product.getFurnitureType().name());
 
         return response;
     }
-    private KitchenApplianceResponseDto mapKitchen(KitchenAppliance product) {
+    private KitchenApplianceResponseDto mapKitchen(Product product) {
         KitchenApplianceResponseDto response = new KitchenApplianceResponseDto();
         mapBaseProductFields(product, response);
 
@@ -294,23 +294,23 @@ public class ProductService {
 
         return response;
     }
-    private ClothesResponseDto mapClothes(Clothes clothes) {
+    private ClothesResponseDto mapClothes(Product product) {
         ClothesResponseDto response = new ClothesResponseDto();
-        mapBaseProductFields(clothes, response);
+        mapBaseProductFields(product, response);
 
-        response.setClotheGender(clothes.getClotheGender().name());
-        response.setClotheMaterial(clothes.getClotheMaterial().name());
-        response.setClotheType(clothes.getClotheType().name());
+        response.setClotheGender(product.getClotheGender().name());
+        response.setClotheMaterial(product.getClotheMaterial().name());
+        response.setClotheType(product.getClotheType().name());
 
         return response;
     }
     public ProductResponseDto mapToResponse(Product product) {
 
         return switch (product.getType()) {
-            case SHOES -> mapShoe((Shoes) product);
-            case FURNITURE -> mapFurniture((Furniture) product);
-            case KITCHEN_APPLIANCE -> mapKitchen((KitchenAppliance) product);
-            case CLOTHES -> mapClothes((Clothes) product);
+            case SHOES -> mapShoe(product);
+            case FURNITURE -> mapFurniture(product);
+            case KITCHEN_APPLIANCE -> mapKitchen(product);
+            case CLOTHES -> mapClothes(product);
             default -> throw new IllegalArgumentException("Unsupported product type: " + product.getType());
         };
     }
