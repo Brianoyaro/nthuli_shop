@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.nthuli_shop.nthuli_shop.category.entity.Category;
 import org.nthuli_shop.nthuli_shop.product.enums.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,7 +25,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> images;
+    private List<ProductImage> images = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private ProductType type;
