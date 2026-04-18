@@ -40,7 +40,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProduct(@RequestParam Long id) {
+    public ResponseEntity<?> getProduct(@PathVariable Long id) {
         //get a product
         try {
             ProductResponseDto product = productService.getProduct(id);
@@ -78,13 +78,29 @@ public class ProductController {
         }
     }
 
-    @PutMapping("/{id}")
-    public void updateProduct() {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateProduct(
+            @PathVariable Long id,
+            @RequestPart("product") ProductRequestDto productJson,
+            @RequestPart("images") List<MultipartFile> images
+    ) {
         // update a product
+        try {
+            ProductResponseDto response = productService.updateProduct(id, productJson, images);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("Message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("Message", "Internal server error" + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@RequestParam Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         // delete a product
         try {
              productService.deleteProduct(id);
