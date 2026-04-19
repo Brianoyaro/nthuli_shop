@@ -54,10 +54,10 @@ public class ProductService {
         logger.info("Retrieved {} products from database", products.size());
         
         Map<String, List<ProductResponseDto>> groupedProducts = products.stream()
-                .map(p -> new java.util.AbstractMap.SimpleEntry<>(p.getType().name(), this.mapToResponse(p)))
                 .collect(Collectors.groupingBy(
-                        java.util.Map.Entry::getKey,
-                        Collectors.mapping(java.util.Map.Entry::getValue, Collectors.toList())
+                        p -> p.getType().name(),
+                        java.util.LinkedHashMap::new,
+                        Collectors.mapping(this::mapToResponse, Collectors.toList())
                 ));
         
         long duration = System.currentTimeMillis() - startTime;
@@ -234,17 +234,25 @@ public class ProductService {
     //-------------------------------------------------------------------------------------------------------------
 
     // update a product
-    public ProductResponseDto updateProduct(Long prodId, ProductRequestDto request, List<MultipartFile> images) {
+    public ProductResponseDto updateProduct(Long prodId, ProductRequestDto request, List<MultipartFile> images, Integer primaryImageIndex) {
         logger.info("Updating product with ID: {}", prodId);
         Product product = productRepository.findById(prodId).orElseThrow(() -> {
             logger.error("Product not found for update with ID: {}", prodId);
             return new RuntimeException("product to update does not exist");
         });
         
-        // update images if provided
+        // delete all old images first if new images are provided
         if (images != null && !images.isEmpty()) {
-            logger.info("Updating {} images for product ID: {}", images.size(), prodId);
-            attachImages(product, images, -1);
+            logger.info("Deleting {} old images for product ID: {}", product.getImages().size(), prodId);
+            product.getImages().forEach(img -> {
+                logger.debug("Deleting old image: {}", img.getImageUrl());
+                fileStorageService.deleteFile(img.getImageUrl());
+            });
+            product.getImages().clear();
+            
+            // attach new images
+            logger.info("Attaching {} new images for product ID: {}", images.size(), prodId);
+            attachImages(product, images, primaryImageIndex);
         }
         
         // update name, description, price, category_id, product_type

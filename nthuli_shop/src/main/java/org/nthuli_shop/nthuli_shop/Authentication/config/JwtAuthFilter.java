@@ -50,7 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         final String token = authHeader.substring(7);
         // Validate token format before parsing
-        if (token.isEmpty() || !token.contains(".")) {
+        if (!token.contains(".")) {
             logger.warn("Invalid token format - not a valid JWT");
             filterChain.doFilter(request, response);
             return;

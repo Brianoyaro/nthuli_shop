@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.nthuli_shop.nthuli_shop.category.dto.CategoryResponseDto;
 import org.nthuli_shop.nthuli_shop.category.dto.CreateCategoryRequestDto;
 import org.nthuli_shop.nthuli_shop.category.service.CategoryService;
+import org.nthuli_shop.nthuli_shop.product.dto.ProductResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -77,6 +78,29 @@ public class CategoriesController {
         List<CategoryResponseDto> categories =  categoryService.getAllCategories();
         logger.info("Retrieved {} categories", categories.size());
         return ResponseEntity.ok(categories);
+    }
+
+    // get all products in a category
+    @GetMapping("/{id}/products")
+    public ResponseEntity<?> getProductsByCategory(@PathVariable Long id) {
+        logger.info("GET /api/category/{}/products - Fetch products for category", id);
+        try {
+            List<ProductResponseDto> products = categoryService.getProductsByCategory(id);
+            logger.info("Retrieved {} products for category ID: {}", products.size(), id);
+            return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            // category does not exist in the database
+            logger.warn("Category not found with ID: {}", id);
+            Map<String, String> error = new HashMap<>();
+            error.put("Message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (Exception e) {
+            // internal server error
+            logger.error("Unexpected error fetching products for category ID: {}", id, e);
+            Map<String, String> error = new HashMap<>();
+            error.put("Message", "Failed to fetch products: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     // update a category

@@ -4,6 +4,10 @@ import org.nthuli_shop.nthuli_shop.category.dto.CategoryResponseDto;
 import org.nthuli_shop.nthuli_shop.category.dto.CreateCategoryRequestDto;
 import org.nthuli_shop.nthuli_shop.category.entity.Category;
 import org.nthuli_shop.nthuli_shop.category.repository.CategoryRepository;
+import org.nthuli_shop.nthuli_shop.product.dto.ProductResponseDto;
+import org.nthuli_shop.nthuli_shop.product.dto.ProductImageResponseDto;
+import org.nthuli_shop.nthuli_shop.product.entity.Product;
+import org.nthuli_shop.nthuli_shop.product.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,9 +19,11 @@ import java.util.Optional;
 public class CategoryService {
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     // get all categories
@@ -81,6 +87,25 @@ public class CategoryService {
         logger.info("Category deleted successfully with ID: {}", id);
     }
 
+    // get all products for a category
+    public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
+        logger.info("Fetching all products for category ID: {}", categoryId);
+        
+        // verify category exists
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> {
+            logger.error("Category not found with ID: {}", categoryId);
+            return new RuntimeException("Category not found");
+        });
+        logger.debug("Category found: {}", category.getName());
+        
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        logger.info("Retrieved {} products for category ID: {}", products.size(), categoryId);
+        
+        return products.stream()
+                .map(this::mapProductToResponse)
+                .toList();
+    }
+
     // mapper
     private CategoryResponseDto mapToResponse(Category category) {
         //
@@ -88,6 +113,30 @@ public class CategoryService {
         response.setId(category.getId());
         response.setName(category.getName());
 
+        return response;
+    }
+
+    // product mapper
+    private ProductResponseDto mapProductToResponse(Product product) {
+        ProductResponseDto response = new ProductResponseDto();
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setDescription(product.getDescription());
+        response.setPrice(product.getPrice());
+        response.setType(product.getType());
+        response.setCategoryName(product.getCategory().getName());
+        
+        List<ProductImageResponseDto> imageDtos = product.getImages().stream()
+                .map(img -> {
+                    ProductImageResponseDto imgDto = new ProductImageResponseDto();
+                    imgDto.setId(img.getId());
+                    imgDto.setImageUrl(img.getImageUrl());
+                    imgDto.setPrimary(img.getPrimary());
+                    return imgDto;
+                })
+                .toList();
+        response.setImages(imageDtos);
+        
         return response;
     }
 }

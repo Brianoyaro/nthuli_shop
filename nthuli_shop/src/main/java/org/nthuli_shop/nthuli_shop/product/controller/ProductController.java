@@ -102,16 +102,23 @@ public class ProductController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProduct(
             @PathVariable Long id,
-            @Valid  @RequestPart("product") ProductRequestDto productJson,
-            @Valid @RequestPart("images") List<MultipartFile> images
+            @RequestPart("product") String productJson,
+            @Valid @RequestPart("images") List<MultipartFile> images,
+            @Valid @RequestParam(defaultValue = "0") Integer primaryIndex
     ) {
         // update a product
         logger.info("PUT /api/products/{} - Update request with {} images", id, images.size());
         try {
-            logger.debug("Updating product ID: {}", id);
-            ProductResponseDto response = productService.updateProduct(id, productJson, images);
+            ProductRequestDto request = objectMapper.readValue(productJson, ProductRequestDto.class);
+            logger.debug("Product request parsed - Name: {}, Type: {}", request.getName(), request.getType());
+            ProductResponseDto response = productService.updateProduct(id, request, images, primaryIndex);
             logger.info("Product updated successfully - ID: {}", id);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Product update validation failed: {}", e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("Message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         } catch (RuntimeException e) {
             logger.warn("Product update failed for ID: {}", id);
             Map<String, String> error = new HashMap<>();
