@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { FaShoppingCart } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
@@ -20,19 +21,7 @@ export function Cart() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <svg
-              className="w-20 h-20 mx-auto mb-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
+            <FaShoppingCart className="w-20 h-20 mx-auto mb-4 text-gray-400" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
             <p className="text-gray-600 mb-8">
               Looks like you haven't added any products yet.
@@ -66,7 +55,7 @@ export function Cart() {
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0">
                   <img
-                    src={item.image}
+                    src={`http://localhost:8080${item.image}`}
                     alt={item.name}
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -79,12 +68,12 @@ export function Cart() {
                       {item.name}
                     </h3>
                     <p className="text-lg font-bold text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      KSH {(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-4 capitalize">
-                    {item.category} • ${item.price.toFixed(2)} each
+                    {item.category} • KSH {item.price.toFixed(2)} each
                   </p>
 
                   {/* Quantity and Remove */}
@@ -141,18 +130,18 @@ export function Cart() {
               <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
                 <div className="flex justify-between">
                   <span className="text-gray-700">Subtotal</span>
-                  <span className="font-semibold">${total.toFixed(2)}</span>
+                  <span className="font-semibold">KSH {total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Shipping</span>
                   <span className="font-semibold">
-                    {total > 50 ? 'FREE' : '$9.99'}
+                    {total > 50 ? 'FREE' : 'KSH 9.99'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Tax</span>
                   <span className="font-semibold">
-                    ${(total * 0.1).toFixed(2)}
+                    KSH {(total * 0.1).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -161,7 +150,7 @@ export function Cart() {
               <div className="flex justify-between items-center mb-6 pb-6 border-b border-gray-200">
                 <span className="text-xl font-bold text-gray-900">Total</span>
                 <span className="text-2xl font-bold text-blue-600">
-                  ${(total + (total > 50 ? 0 : 9.99) + total * 0.1).toFixed(2)}
+                  KSH {(total + (total > 50 ? 0 : 9.99) + total * 0.1).toFixed(2)}
                 </span>
               </div>
 

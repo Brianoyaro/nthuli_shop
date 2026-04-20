@@ -28,10 +28,10 @@ export function Products() {
     : [];
 
   const priceRanges = [
-    { id: 'under-50', label: 'Under $50', min: 0, max: 50 },
-    { id: '50-100', label: '$50 - $100', min: 50, max: 100 },
-    { id: '100-500', label: '$100 - $500', min: 100, max: 500 },
-    { id: '500-plus', label: '$500+', min: 500, max: Infinity },
+    { id: 'under-50', label: 'Under KSH 50', min: 0, max: 50 },
+    { id: '50-100', label: 'KSH 50 - KSH 100', min: 50, max: 100 },
+    { id: '100-500', label: 'KSH 100 - KSH 500', min: 100, max: 500 },
+    { id: '500-plus', label: 'KSH 500+', min: 500, max: Infinity },
   ];
 
   // Flatten and filter products
@@ -97,25 +97,32 @@ export function Products() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Products</h1>
-          <p className="text-gray-600">Showing {filteredProducts.length} products</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            {categoryParam 
+              ? categories.find(c => c.slug === categoryParam)?.name || 'Products'
+              : 'All Products'
+            }
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Sidebar Filters */}
           <div
             className={`lg:block ${showFilters ? 'block' : 'hidden'} lg:col-span-1`}
           >
-            <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+            <div className="bg-white rounded-lg shadow-md p-6 space-y-6 sticky top-4">
               {/* Filter Header */}
               <div className="flex items-center justify-between lg:justify-start">
-                <h2 className="text-xl font-bold text-gray-900">Filters</h2>
+                <h2 className="text-lg font-bold text-gray-900">Filters</h2>
                 <button
                   onClick={() => setShowFilters(false)}
-                  className="lg:hidden text-gray-500"
+                  className="lg:hidden text-gray-500 text-xl"
                 >
                   ✕
                 </button>
@@ -123,26 +130,26 @@ export function Products() {
 
               {/* Category Filter */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Category</h3>
+                <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Category</h3>
                 <div className="space-y-2">
-                  <label className="flex items-center cursor-pointer">
+                  <label className="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
                     <input
                       type="radio"
                       name="category"
                       checked={!categoryParam}
                       onChange={() => navigate('/products')}
-                      className="w-4 h-4"
+                      className="w-4 h-4 cursor-pointer"
                     />
                     <span className="ml-3 text-gray-700">All Categories</span>
                   </label>
                   {categories.map(cat => (
-                    <label key={cat.id} className="flex items-center cursor-pointer">
+                    <label key={cat.id} className="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
                       <input
                         type="radio"
                         name="category"
                         checked={categoryParam === cat.slug}
                         onChange={() => navigate(`/products?category=${cat.slug}`)}
-                        className="w-4 h-4"
+                        className="w-4 h-4 cursor-pointer"
                       />
                       <span className="ml-3 text-gray-700">{cat.name}</span>
                     </label>
@@ -152,26 +159,26 @@ export function Products() {
 
               {/* Price Range Filter */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Price Range</h3>
+                <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Price Range</h3>
                 <div className="space-y-2">
-                  <label className="flex items-center cursor-pointer">
+                  <label className="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
                     <input
                       type="radio"
                       name="price"
                       checked={!selectedPriceRange}
                       onChange={() => setSelectedPriceRange(null)}
-                      className="w-4 h-4"
+                      className="w-4 h-4 cursor-pointer"
                     />
                     <span className="ml-3 text-gray-700">All Prices</span>
                   </label>
                   {priceRanges.map(range => (
-                    <label key={range.id} className="flex items-center cursor-pointer">
+                    <label key={range.id} className="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
                       <input
                         type="radio"
                         name="price"
                         checked={selectedPriceRange?.id === range.id}
                         onChange={() => setSelectedPriceRange(range)}
-                        className="w-4 h-4"
+                        className="w-4 h-4 cursor-pointer"
                       />
                       <span className="ml-3 text-gray-700">{range.label}</span>
                     </label>
@@ -186,41 +193,44 @@ export function Products() {
                     navigate('/products');
                     setSelectedPriceRange(null);
                   }}
-                  className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="w-full px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
                 >
-                  Clear Filters
+                  Clear All Filters
                 </button>
               )}
             </div>
           </div>
 
           {/* Products Grid */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             {/* Toolbar */}
-            <div className="flex items-center justify-between mb-6 gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+                className="lg:hidden px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm"
               >
                 {showFilters ? 'Hide' : 'Show'} Filters
               </button>
 
               {/* Sort Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ml-auto"
-              >
-                <option value="newest">Newest</option>
-                <option value="name">Name (A-Z)</option>
-                <option value="price-low">Price (Low to High)</option>
-                <option value="price-high">Price (High to Low)</option>
-              </select>
+              <div className="ml-auto">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Sort by:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="price-low">Price (Low to High)</option>
+                  <option value="price-high">Price (High to Low)</option>
+                </select>
+              </div>
             </div>
 
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                 {filteredProducts.map(product => (
                   <ProductCard
                     key={product.id}
@@ -230,10 +240,20 @@ export function Products() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">
+              <div className="text-center py-16 bg-white rounded-lg">
+                <div className="text-6xl mb-4">🔍</div>
+                <p className="text-gray-500 text-lg font-medium">
                   No products found matching your filters.
                 </p>
+                <button
+                  onClick={() => {
+                    navigate('/products');
+                    setSelectedPriceRange(null);
+                  }}
+                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Clear Filters & Try Again
+                </button>
               </div>
             )}
           </div>

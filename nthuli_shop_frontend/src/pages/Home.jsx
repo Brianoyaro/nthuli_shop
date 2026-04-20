@@ -1,19 +1,25 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useState, useRef } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { productsAPI } from '../services/api';
 
 export function Home() {
   const navigate = useNavigate();
-  
+  const scrollContainers = useRef({});
+  const [scrollPositions, setScrollPositions] = useState({});
+
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: productsAPI.getAll,
   });
 
-  // Transform grouped data into flat array and get first 6
-  const featuredProducts = productsData
-    ? Object.values(productsData).flat().slice(0, 6)
+  // Organize products by category
+  const productsByCategory = productsData || {};
+
+  // Get all products flat for featured
+  const allProducts = productsData
+    ? Object.values(productsData).flat()
     : [];
 
   // Extract categories from the data
@@ -22,8 +28,78 @@ export function Home() {
         id: idx + 1,
         name: categoryKey.charAt(0) + categoryKey.slice(1).toLowerCase(),
         slug: categoryKey.toLowerCase(),
+        key: categoryKey,
       }))
     : [];
+
+  const handleScroll = (direction, categoryKey) => {
+    const container = scrollContainers.current[categoryKey];
+    if (!container) return;
+
+    const scrollAmount = 300;
+    if (direction === 'left') {
+      container.scrollLeft -= scrollAmount;
+    } else {
+      container.scrollLeft += scrollAmount;
+    }
+  };
+
+  const ProductCarousel = ({ title, products, categoryKey, showViewMore = true }) => {
+    if (!products || products.length === 0) return null;
+
+    return (
+      <section className="py-12 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+            {showViewMore && (
+              <button
+                onClick={() => navigate(`/products?category=${categoryKey.toLowerCase()}`)}
+                className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
+              >
+                See More →
+              </button>
+            )}
+          </div>
+
+          {/* Carousel Container */}
+          <div className="relative group">
+            {/* Left Arrow */}
+            <button
+              onClick={() => handleScroll('left', categoryKey)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg p-2 rounded-full hover:bg-gray-50 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              ←
+            </button>
+
+            {/* Products Scroll Container */}
+            <div
+              ref={(el) => (scrollContainers.current[categoryKey] = el)}
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
+              style={{ scrollBehavior: 'smooth' }}
+            >
+              {products.slice(0, 8).map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  variant="carousel"
+                  onViewDetails={() => navigate(`/product/${product.id}`)}
+                />
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <button
+              onClick={() => handleScroll('right', categoryKey)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg p-2 rounded-full hover:bg-gray-50 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -56,7 +132,7 @@ export function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             {/* Hero Text */}
             <div>
@@ -87,26 +163,24 @@ export function Home() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Shop by Category
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="py-12 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">Shop by Category</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map(category => (
               <div
                 key={category.id}
                 className="cursor-pointer group overflow-hidden rounded-lg"
                 onClick={() => navigate(`/products?category=${category.slug}`)}
               >
-                <div className="relative overflow-hidden bg-gray-200 h-48 rounded-lg">
+                <div className="relative overflow-hidden bg-gray-200 h-32 rounded-lg">
                   <img
-                    src={`https://picsum.photos/400/300?random=${category.id}`}
+                    src={`https://picsum.photos/300/200?random=${category.id}`}
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                    <h3 className="text-2xl font-bold text-white">{category.name}</h3>
+                  <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                    <h3 className="text-lg font-bold text-white text-center">{category.name}</h3>
                   </div>
                 </div>
               </div>
@@ -115,35 +189,47 @@ export function Home() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Featured Products
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredProducts.map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onViewDetails={() => navigate(`/product/${product.id}`)}
-              />
-            ))}
-          </div>
-          <div className="mt-12 text-center">
-            <button
-              onClick={() => navigate('/products')}
-              className="bg-blue-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              View All Products
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* Most Popular / Trending Section */}
+      <ProductCarousel 
+        title="Most Popular" 
+        products={allProducts.slice(0, 10)}
+        categoryKey="POPULAR"
+        showViewMore={false}
+      />
+
+      {/* Category-based Carousels */}
+      {categories.map(category => (
+        <ProductCarousel
+          key={category.id}
+          title={category.name}
+          products={productsByCategory[category.key]}
+          categoryKey={category.key}
+        />
+      ))}
+
+      {/* Top Deals Section */}
+      {allProducts.length > 0 && (
+        <ProductCarousel 
+          title="Top Deals" 
+          products={allProducts.sort((a, b) => b.price - a.price).slice(0, 10)}
+          categoryKey="DEALS"
+          showViewMore={false}
+        />
+      )}
+
+      {/* Exclusive Deals Section */}
+      {allProducts.length > 0 && (
+        <ProductCarousel 
+          title="Exclusive Deals ✨" 
+          products={allProducts.slice().reverse().slice(0, 10)}
+          categoryKey="EXCLUSIVE"
+          showViewMore={false}
+        />
+      )}
 
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 text-center">
+        <div className="max-w-7xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Exclusive Offers Await!</h2>
           <p className="text-xl text-blue-100 mb-8">
             Sign up for our newsletter to get the latest deals and updates

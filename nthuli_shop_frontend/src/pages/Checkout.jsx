@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FaShoppingCart, FaCheckCircle } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
 import { Button } from '../components/Button';
 import { checkoutFormSchema } from '../schemas/validation';
@@ -41,19 +42,7 @@ export function Checkout() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <svg
-              className="w-20 h-20 mx-auto mb-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
+            <FaShoppingCart className="w-20 h-20 mx-auto mb-4 text-gray-400" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
             <p className="text-gray-600 mb-8">
               Add items to your cart before proceeding to checkout.
@@ -77,19 +66,7 @@ export function Checkout() {
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="mb-6">
-              <svg
-                className="w-20 h-20 mx-auto text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+              <FaCheckCircle className="w-20 h-20 mx-auto text-green-600" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Order Placed Successfully!</h2>
             <p className="text-gray-600 mb-2">
@@ -339,7 +316,7 @@ export function Checkout() {
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     </div>
                     <p className="font-semibold text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      KSH {(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
@@ -349,17 +326,17 @@ export function Checkout() {
               <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
                 <div className="flex justify-between">
                   <span className="text-gray-700">Subtotal</span>
-                  <span className="font-semibold">${total.toFixed(2)}</span>
+                  <span className="font-semibold">KSH {total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Shipping</span>
                   <span className="font-semibold">
-                    {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
+                    {shipping === 0 ? 'FREE' : `KSH ${shipping.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Tax</span>
-                  <span className="font-semibold">${tax.toFixed(2)}</span>
+                  <span className="font-semibold">KSH {tax.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -367,7 +344,7 @@ export function Checkout() {
               <div className="flex justify-between items-center mb-6">
                 <span className="text-xl font-bold text-gray-900">Total</span>
                 <span className="text-2xl font-bold text-blue-600">
-                  ${finalTotal.toFixed(2)}
+                  KSH {finalTotal.toFixed(2)}
                 </span>
               </div>
 
