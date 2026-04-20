@@ -68,12 +68,12 @@ export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
               )}
             </div>
 
-            {/* Add to Cart Button */}
+            {/* Buy Now Button */}
             <button
               onClick={handleAddToCart}
               className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors text-sm font-medium"
             >
-              ADD TO CART
+              BUY NOW
             </button>
           </div>
         </div>

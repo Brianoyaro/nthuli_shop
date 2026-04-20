@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { productsAPI } from '../services/api';
 
@@ -8,6 +8,23 @@ export function Home() {
   const navigate = useNavigate();
   const scrollContainers = useRef({});
   const [scrollPositions, setScrollPositions] = useState({});
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Carousel images
+  const carouselImages = [
+    '/home-carousal/shoes.jpg',
+    '/home-carousal/clothes.jpg',
+    '/home-carousal/furniture.jpg',
+    '/home-carousal/kitchen_appliance.jpg',
+  ];
+
+  // Auto-rotate carousel images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % carouselImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [carouselImages.length]);
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products'],
@@ -48,7 +65,7 @@ export function Home() {
     if (!products || products.length === 0) return null;
 
     return (
-      <section className="py-12 bg-white border-b">
+      <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
@@ -131,55 +148,104 @@ export function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Hero Text */}
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Welcome to Nthuli Shop
-              </h1>
-              <p className="text-xl text-blue-100 mb-8">
-                Discover premium quality products for every lifestyle. Shop the latest fashion, accessories, and more.
-              </p>
-              <button
-                onClick={() => navigate('/products')}
-                className="bg-white text-blue-600 font-bold px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                Shop Now
-              </button>
-            </div>
+      <section className="relative w-full h-screen overflow-hidden">
+        {/* Full-Screen Carousel */}
+        <div className="relative w-full h-full bg-gray-200">
+              {/* Carousel Images */}
+              {carouselImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Hero carousel ${index + 1}`}
+                  className={`absolute w-full h-full object-cover transition-opacity duration-1000 ${
+                    index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+              ))}
 
-            {/* Hero Image */}
-            <div className="hidden md:block">
-              <img
-                src="https://picsum.photos/500/400?random=hero"
-                alt="Hero"
-                className="w-full rounded-lg shadow-lg"
-              />
-            </div>
+              {/* Previous Button */}
+              <button
+                onClick={() =>
+                  setCurrentImageIndex(
+                    (prev) => (prev - 1 + carouselImages.length) % carouselImages.length
+                  )
+                }
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-900 rounded-full p-2 transition-all"
+              >
+                ←
+              </button>
+
+              {/* Next Button */}
+              <button
+                onClick={() =>
+                  setCurrentImageIndex((prev) => (prev + 1) % carouselImages.length)
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-900 rounded-full p-2 transition-all"
+              >
+                →
+              </button>
+
+              {/* Carousel Indicators */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+                {carouselImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentImageIndex
+                        ? 'bg-white w-8'
+                        : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                    }`}
+                  />
+                ))}
+              </div>
+        </div>
+
+        {/* Text Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="text-center text-white px-4 max-w-2xl">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
+              Welcome to Nthuli Shop
+            </h1>
+            <p className="text-lg md:text-xl mb-8">
+              Discover premium quality products for every lifestyle. Shop the latest fashion, accessories, and more.
+            </p>
+            <button
+              onClick={() => navigate('/products')}
+              className="bg-white text-blue-600 font-bold px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              Shop Now
+            </button>
           </div>
         </div>
       </section>
 
       {/* Categories Section */}
-      <section className="py-12 bg-white border-b">
+      <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {categories.map(category => (
+            {[
+              { id: 1, name: 'Shoes', slug: 'shoes', image: '/shoes-category.jpg' },
+              { id: 2, name: 'Clothes', slug: 'clothes', image: '/clothes-category.jpg' },
+              { id: 3, name: 'Furniture', slug: 'furniture', image: '/furniture-category.jpg' },
+              { id: 4, name: 'Kitchen Appliances', slug: 'kitchen', image: '/kitchen_appliances-category.jpg' },
+            ].map(category => (
               <div
                 key={category.id}
                 className="cursor-pointer group overflow-hidden rounded-lg"
-                onClick={() => navigate(`/products?category=${category.slug}`)}
+                onClick={() => {
+                  const categoryKey = categories.find(c => c.slug === category.slug)?.key;
+                  if (categoryKey) navigate(`/products?category=${category.slug}`);
+                }}
               >
-                <div className="relative overflow-hidden bg-gray-200 h-32 rounded-lg">
+                <div className="relative overflow-hidden bg-gray-200 h-48 rounded-lg">
                   <img
-                    src={`https://picsum.photos/300/200?random=${category.id}`}
+                    src={category.image}
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
                     <h3 className="text-lg font-bold text-white text-center">{category.name}</h3>
                   </div>
                 </div>

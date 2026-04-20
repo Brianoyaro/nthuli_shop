@@ -14,7 +14,8 @@ export function Products() {
     queryFn: productsAPI.getAll,
   });
 
-  const [selectedPriceRange, setSelectedPriceRange] = useState(null);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(10000);
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -27,46 +28,66 @@ export function Products() {
       }))
     : [];
 
-  const priceRanges = [
-    { id: 'under-50', label: 'Under KSH 50', min: 0, max: 50 },
-    { id: '50-100', label: 'KSH 50 - KSH 100', min: 50, max: 100 },
-    { id: '100-500', label: 'KSH 100 - KSH 500', min: 100, max: 500 },
-    { id: '500-plus', label: 'KSH 500+', min: 500, max: Infinity },
-  ];
+  // Get max price from all products for slider
+  const maxAvailablePrice = useMemo(() => {
+    if (!productsData) return 10000;
+    const allProducts = Object.values(productsData).flat();
+    return Math.ceil(Math.max(...allProducts.map(p => p.price), 10000) / 100) * 100;
+  }, [productsData]);
 
-  // Flatten and filter products
+  // Filter and sort products - used when a specific category is selected
   const filteredProducts = useMemo(() => {
-    if (!productsData) return [];
+    if (!productsData || !categoryParam) return [];
 
-    let filtered = [];
-    
-    if (categoryParam) {
-      const categoryKey = categoryParam.toUpperCase();
-      filtered = productsData[categoryKey] || [];
-    } else {
-      filtered = Object.values(productsData).flat();
-    }
+    const categoryKey = categoryParam.toUpperCase();
+    let products = productsData[categoryKey] || [];
 
-    // Filter by price range
-    if (selectedPriceRange) {
-      filtered = filtered.filter(
-        p => p.price >= selectedPriceRange.min && p.price <= selectedPriceRange.max
-      );
-    }
+    // Apply price filter
+    products = products.filter(
+      p => p.price >= minPrice && p.price <= maxPrice
+    );
 
-    // Sort products
+    // Apply sorting
     if (sortBy === 'price-low') {
-      filtered.sort((a, b) => a.price - b.price);
+      products.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-high') {
-      filtered.sort((a, b) => b.price - a.price);
+      products.sort((a, b) => b.price - a.price);
     } else if (sortBy === 'newest') {
-      filtered.sort((a, b) => b.id - a.id);
+      products.sort((a, b) => b.id - a.id);
     } else if (sortBy === 'name') {
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      products.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    return filtered;
-  }, [productsData, categoryParam, selectedPriceRange, sortBy]);
+    return products;
+  }, [productsData, minPrice, maxPrice, sortBy, categoryParam]);
+
+  // Group products by category with price filtering - used when no category is selected
+  const groupedAndFilteredProducts = useMemo(() => {
+    if (!productsData || categoryParam) return {};
+
+    const grouped = {};
+    Object.entries(productsData).forEach(([categoryKey, products]) => {
+      // Apply price filter
+      let filtered = products.filter(
+        p => p.price >= minPrice && p.price <= maxPrice
+      );
+
+      // Apply sorting
+      if (sortBy === 'price-low') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortBy === 'price-high') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (sortBy === 'newest') {
+        filtered.sort((a, b) => b.id - a.id);
+      } else if (sortBy === 'name') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      }
+
+      grouped[categoryKey] = filtered;
+    });
+
+    return grouped;
+  }, [productsData, minPrice, maxPrice, sortBy, categoryParam]);
 
   if (isLoading) {
     return (
@@ -102,12 +123,15 @@ export function Products() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             {categoryParam 
-              ? categories.find(c => c.slug === categoryParam)?.name || 'Products'
+              ? categories.find(c => c.slug === categoryParam)?.name || 'All Products'
               : 'All Products'
             }
           </h1>
           <p className="text-gray-600 text-lg">
-            Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+            {categoryParam 
+              ? `Showing ${filteredProducts.length} ${filteredProducts.length === 1 ? 'product' : 'products'}`
+              : 'Browse products by category'
+            }
           </p>
         </div>
 
@@ -157,41 +181,60 @@ export function Products() {
                 </div>
               </div>
 
-              {/* Price Range Filter */}
+              {/* Price Range Slider */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Price Range</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
-                    <input
-                      type="radio"
-                      name="price"
-                      checked={!selectedPriceRange}
-                      onChange={() => setSelectedPriceRange(null)}
-                      className="w-4 h-4 cursor-pointer"
-                    />
-                    <span className="ml-3 text-gray-700">All Prices</span>
-                  </label>
-                  {priceRanges.map(range => (
-                    <label key={range.id} className="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
-                      <input
-                        type="radio"
-                        name="price"
-                        checked={selectedPriceRange?.id === range.id}
-                        onChange={() => setSelectedPriceRange(range)}
-                        className="w-4 h-4 cursor-pointer"
-                      />
-                      <span className="ml-3 text-gray-700">{range.label}</span>
+                <h3 className="font-semibold text-gray-900 mb-4 text-sm uppercase tracking-wide">Price Range</h3>
+                <div className="space-y-4">
+                  {/* Min Price Slider */}
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">
+                      Min: KSH {minPrice.toLocaleString()}
                     </label>
-                  ))}
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxAvailablePrice}
+                      value={minPrice}
+                      onChange={(e) => {
+                        const newMin = parseInt(e.target.value);
+                        if (newMin <= maxPrice) setMinPrice(newMin);
+                      }}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                  </div>
+
+                  {/* Max Price Slider */}
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">
+                      Max: KSH {maxPrice.toLocaleString()}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxAvailablePrice}
+                      value={maxPrice}
+                      onChange={(e) => {
+                        const newMax = parseInt(e.target.value);
+                        if (newMax >= minPrice) setMaxPrice(newMax);
+                      }}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                  </div>
+
+                  {/* Price Display */}
+                  <div className="text-sm font-medium text-gray-900 bg-blue-50 p-2 rounded">
+                    KSH {minPrice.toLocaleString()} - KSH {maxPrice.toLocaleString()}
+                  </div>
                 </div>
               </div>
 
               {/* Clear Filters */}
-              {(categoryParam || selectedPriceRange) && (
+              {(categoryParam || minPrice > 0 || maxPrice < maxAvailablePrice) && (
                 <button
                   onClick={() => {
                     navigate('/products');
-                    setSelectedPriceRange(null);
+                    setMinPrice(0);
+                    setMaxPrice(maxAvailablePrice);
                   }}
                   className="w-full px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
                 >
@@ -201,7 +244,7 @@ export function Products() {
             </div>
           </div>
 
-          {/* Products Grid */}
+          {/* Products Grid - Grouped by Category */}
           <div className="lg:col-span-4">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
@@ -228,32 +271,90 @@ export function Products() {
               </div>
             </div>
 
-            {/* Products Grid */}
-            {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-                {filteredProducts.map(product => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onViewDetails={() => navigate(`/product/${product.id}`)}
-                  />
-                ))}
-              </div>
+            {/* Products Grid - Single Category View */}
+            {categoryParam ? (
+              filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+                  {filteredProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onViewDetails={() => navigate(`/product/${product.id}`)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white rounded-lg">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <p className="text-gray-500 text-lg font-medium">
+                    No products found matching your filters.
+                  </p>
+                  <button
+                    onClick={() => {
+                      navigate('/products');
+                      setMinPrice(0);
+                      setMaxPrice(maxAvailablePrice);
+                    }}
+                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Clear Filters & Try Again
+                  </button>
+                </div>
+              )
             ) : (
-              <div className="text-center py-16 bg-white rounded-lg">
-                <div className="text-6xl mb-4">🔍</div>
-                <p className="text-gray-500 text-lg font-medium">
-                  No products found matching your filters.
-                </p>
-                <button
-                  onClick={() => {
-                    navigate('/products');
-                    setSelectedPriceRange(null);
-                  }}
-                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Clear Filters & Try Again
-                </button>
+              /* All Categories View */
+              <div className="space-y-12">
+                {categories.map(category => {
+                  const categoryProducts = groupedAndFilteredProducts[category.id] || [];
+                  const displayCount = 6;
+                  const displayedProducts = categoryProducts.slice(0, displayCount);
+                  const hasMore = categoryProducts.length > displayCount;
+
+                  return (
+                    <div key={category.id}>
+                      {/* Category Header */}
+                      <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">{category.name}</h2>
+                        <span className="text-sm text-gray-500">
+                          {categoryProducts.length} products
+                        </span>
+                      </div>
+
+                      {/* Products Grid */}
+                      {categoryProducts.length > 0 ? (
+                        <>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-6">
+                            {displayedProducts.map(product => (
+                              <ProductCard
+                                key={product.id}
+                                product={product}
+                                onViewDetails={() => navigate(`/product/${product.id}`)}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Show More Button */}
+                          {hasMore && (
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => navigate(`/products?category=${category.slug}`)}
+                                className="px-8 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                              >
+                                Show More ({categoryProducts.length - displayCount} more)
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-12 bg-gray-100 rounded-lg">
+                          <p className="text-gray-500">
+                            No products in {category.name} within this price range.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
