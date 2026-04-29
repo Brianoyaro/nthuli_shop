@@ -46,6 +46,8 @@ public class Product {
     private FurnitureMaterialEnum furnitureMaterial;
     @Enumerated(EnumType.STRING)
     private FurnitureTypeEnum furnitureType;
+    @Enumerated(EnumType.STRING)
+    private FurnitureCategoryEnum furnitureCategory;
 
     // clothes related attributes
     @Enumerated(EnumType.STRING)
@@ -78,10 +80,11 @@ public class Product {
         this.clotheType = clotheType;
     }
     // furniture constructor
-    public Product(String name, String description, Double price, Category category, List<ProductImage> images, ProductType type, FurnitureTypeEnum furnitureType, FurnitureMaterialEnum furnitureMaterial) {
+    public Product(String name, String description, Double price, Category category, List<ProductImage> images, ProductType type, FurnitureTypeEnum furnitureType, FurnitureMaterialEnum furnitureMaterial, FurnitureCategoryEnum furnitureCategory) {
         this(name, description, price, category, images, type);
         this.furnitureType = furnitureType;
         this.furnitureMaterial = furnitureMaterial;
+        this.furnitureCategory = furnitureCategory;
     }
     // kitchen appliance constructor
     public Product(String name, String description, Double price, Category category, List<ProductImage> images, ProductType type, Double wattage, KitchenApplianceFunctionEnum applianceFunction) {
@@ -192,6 +195,14 @@ public class Product {
 
     public void setFurnitureType(FurnitureTypeEnum furnitureType) {
         this.furnitureType = furnitureType;
+    }
+
+    public FurnitureCategoryEnum getFurnitureCategory() {
+        return furnitureCategory;
+    }
+
+    public void setFurnitureCategory(FurnitureCategoryEnum furnitureCategory) {
+        this.furnitureCategory = furnitureCategory;
     }
 
     public GenderEnum getClotheGender() {
