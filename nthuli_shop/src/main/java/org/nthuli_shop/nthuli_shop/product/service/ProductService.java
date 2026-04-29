@@ -137,19 +137,23 @@ public class ProductService {
         logger.info("Successfully attached {} images to product ID: {}", imageEntities.size(), product.getId());
     }
 
-    private Category getCategory(Long categoryId) {
-        logger.debug("Fetching category with ID: {}", categoryId);
-        return categoryRepository.findById(categoryId)
+    private Category getCategoryByProductType(String productTypeName) {
+        logger.debug("Fetching category with name: {}", productTypeName);
+        return categoryRepository.findByName(productTypeName)
                 .orElseThrow(() -> {
-                    logger.error("Category not found with ID: {}", categoryId);
-                    return new RuntimeException("Category not found");
+                    logger.error("Category not found with name: {}. Please ensure categories are pre-created for all product types.", productTypeName);
+                    return new RuntimeException(
+                        "Category '" + productTypeName + "' not found. " +
+                        "Please ensure the following categories exist in the database: " +
+                        "SHOES, FURNITURE, CLOTHES, KITCHEN_APPLIANCES"
+                    );
                 });
     }
 
     private Product createShoeEntity(ShoeRequestDto request) {
         logger.debug("Creating shoe entity with name: {}, gender: {}, material: {}", 
             request.getName(), request.getGender(), request.getMaterial());
-        Category category = getCategory(request.getCategoryId());
+        Category category = getCategoryByProductType(request.getType());
 
         Product product = new Product();
         product.setName(request.getName());
@@ -166,9 +170,12 @@ public class ProductService {
     }
 
     private Product createFurnitureEntity(FurnitureRequestDto request) {
-        logger.debug("Creating furniture entity with name: {}, type: {}, material: {}, category: {}", 
-            request.getName(), request.getFurnitureType(), request.getFurnitureMaterial(), request.getFurnitureCategory());
-        Category category = getCategory(request.getCategoryId());
+        logger.debug("Creating furniture entity with name: {}, type: {}, material: {}", 
+            request.getName(), request.getFurnitureType(), request.getFurnitureMaterial());
+        
+        Category category = getCategoryByProductType(request.getType());
+        
+        FurnitureTypeEnum typeEnum = FurnitureTypeEnum.valueOf(request.getFurnitureType());
 
         Product product = new Product();
         product.setName(request.getName());
@@ -180,21 +187,19 @@ public class ProductService {
         product.setFurnitureMaterial(
                 FurnitureMaterialEnum.valueOf(request.getFurnitureMaterial())
         );
-        product.setFurnitureType(
-                FurnitureTypeEnum.valueOf(request.getFurnitureType())
-        );
-        product.setFurnitureCategory(
-                FurnitureCategoryEnum.valueOf(request.getFurnitureCategory())
-        );
+        product.setFurnitureType(typeEnum);
+        
+        product.setFurnitureCategory(typeEnum.getCategory());
 
-        logger.debug("Furniture entity created with type: FURNITURE");
+        logger.debug("Furniture entity created with type: FURNITURE, category: {}", product.getFurnitureCategory());
         return product;
     }
 
     private Product createKitchenEntity(KitchenApplianceRequestDto request) {
         logger.debug("Creating kitchen appliance entity with name: {}, wattage: {}, function: {}", 
             request.getName(), request.getWattage(), request.getApplianceFunction());
-        Category category = getCategory(request.getCategoryId());
+        
+        Category category = getCategoryByProductType(request.getType());
 
         Product product = new Product();
         product.setName(request.getName());
@@ -213,7 +218,8 @@ public class ProductService {
     private Product createClothesEntity(ClothesRequestDto request) {
         logger.debug("Creating clothes entity with name: {}, gender: {}, type: {}, material: {}", 
             request.getName(), request.getClotheGender(), request.getClotheType(), request.getClotheMaterial());
-        Category category = getCategory(request.getCategoryId());
+        
+        Category category = getCategoryByProductType(request.getType());
 
         Product product = new Product();
         product.setName(request.getName());
@@ -244,17 +250,36 @@ public class ProductService {
             return new RuntimeException("product to update does not exist");
         });
         
-        // delete all old images first if new images are provided
-        if (images != null && !images.isEmpty()) {
-            logger.info("Deleting {} old images for product ID: {}", product.getImages().size(), prodId);
+        // Handle image updates with imagesToKeep logic
+        List<Long> imagesToKeep = request.getImagesToKeep();
+        if (imagesToKeep != null && !imagesToKeep.isEmpty()) {
+            logger.info("Processing image updates with imagesToKeep list containing {} IDs", imagesToKeep.size());
+            
+            // Delete images that are NOT in the imagesToKeep list
+            List<ProductImage> imagesToDelete = product.getImages().stream()
+                    .filter(img -> !imagesToKeep.contains(img.getId()))
+                    .toList();
+            
+            logger.info("Deleting {} images that were not in imagesToKeep list", imagesToDelete.size());
+            imagesToDelete.forEach(img -> {
+                logger.debug("Deleting image ID: {} with URL: {}", img.getId(), img.getImageUrl());
+                fileStorageService.deleteFile(img.getImageUrl());
+            });
+            product.getImages().removeAll(imagesToDelete);
+            
+            // Attach new images if provided
+            if (images != null && !images.isEmpty()) {
+                logger.info("Attaching {} new images to product ID: {}", images.size(), prodId);
+                attachImages(product, images, primaryImageIndex);
+            }
+        } else if (images != null && !images.isEmpty()) {
+            // If no imagesToKeep provided but new images are provided, delete all old images and add new ones
+            logger.info("No imagesToKeep list provided, deleting all {} old images for product ID: {}", product.getImages().size(), prodId);
             product.getImages().forEach(img -> {
                 logger.debug("Deleting old image: {}", img.getImageUrl());
                 fileStorageService.deleteFile(img.getImageUrl());
             });
             product.getImages().clear();
-            
-            // attach new images
-            logger.info("Attaching {} new images for product ID: {}", images.size(), prodId);
             attachImages(product, images, primaryImageIndex);
         }
         
@@ -274,10 +299,8 @@ public class ProductService {
         if (request.getType() != null && !request.getType().trim().isEmpty()){
             logger.debug("Updating product type to: {}", request.getType());
             product.setType(ProductType.valueOf(request.getType()));
-        }
-        if (request.getCategoryId() != null) {
-            logger.debug("Updating product category to ID: {}", request.getCategoryId());
-            Category newCategory = getCategory(request.getCategoryId());
+            // Auto-update category based on product type
+            Category newCategory = getCategoryByProductType(request.getType());
             product.setCategory(newCategory);
         }
         
@@ -312,11 +335,10 @@ public class ProductService {
                 }
                 if (((FurnitureRequestDto) request).getFurnitureType() != null && !(((FurnitureRequestDto) request).getFurnitureType().trim().isEmpty())) {
                     logger.debug("Updating furniture type to: {}", ((FurnitureRequestDto) request).getFurnitureType());
-                    product.setFurnitureType(FurnitureTypeEnum.valueOf(((FurnitureRequestDto) request).getFurnitureType()));
-                }
-                if (((FurnitureRequestDto) request).getFurnitureCategory() != null && !(((FurnitureRequestDto) request).getFurnitureCategory().trim().isEmpty())) {
-                    logger.debug("Updating furniture category to: {}", ((FurnitureRequestDto) request).getFurnitureCategory());
-                    product.setFurnitureCategory(FurnitureCategoryEnum.valueOf(((FurnitureRequestDto) request).getFurnitureCategory()));
+                    FurnitureTypeEnum typeEnum = FurnitureTypeEnum.valueOf(((FurnitureRequestDto) request).getFurnitureType());
+                    product.setFurnitureType(typeEnum);
+                    // Auto-infer category from the new furniture type
+                    product.setFurnitureCategory(typeEnum.getCategory());
                 }
             }
             case ProductType.CLOTHES -> {

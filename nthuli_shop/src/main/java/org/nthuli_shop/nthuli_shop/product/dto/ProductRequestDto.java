@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -25,22 +26,20 @@ public class ProductRequestDto {
     private String description;
     @NotNull
     private Double price;
-    @NotNull
-    private Long categoryId;
     @NotBlank(message = "product type is required")
     private String type;
 //    private List<ProductImage> images;
+    private List<Long> imagesToKeep;
 
 
     public ProductRequestDto() {
     }
 
-    public ProductRequestDto(String name, String type, Double price, String description, Long categoryId) {
+    public ProductRequestDto(String name, String type, Double price, String description) {
         this.name = name;
         this.type = type;
         this.price = price;
         this.description = description;
-        this.categoryId = categoryId;
     }
 
     public String getName() {
@@ -59,14 +58,6 @@ public class ProductRequestDto {
         this.type = type;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
     public Double getPrice() {
         return price;
     }
@@ -81,5 +72,13 @@ public class ProductRequestDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<Long> getImagesToKeep() {
+        return imagesToKeep;
+    }
+
+    public void setImagesToKeep(List<Long> imagesToKeep) {
+        this.imagesToKeep = imagesToKeep;
     }
 }

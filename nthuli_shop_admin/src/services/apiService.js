@@ -36,12 +36,19 @@ export const productAPI = {
   },
 
   // Update product with images
-  updateProduct: (id, productData, images) => {
+  updateProduct: (id, productData, newImages, primaryIndex = 0) => {
     const formData = new FormData();
+    // productData already includes imagesToKeep array, so it will be JSON stringified together
     formData.append('product', JSON.stringify(productData));
-    images.forEach((image) => {
-      formData.append('images', image);
+    
+    // Add only new images
+    newImages.forEach((image) => {
+      if (image instanceof File) {
+        formData.append('images', image);
+      }
     });
+    
+    formData.append('primaryIndex', primaryIndex);
 
     return apiClient.put(`/api/products/${id}`, formData, {
       headers: {

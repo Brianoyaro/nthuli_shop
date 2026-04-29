@@ -8,14 +8,11 @@ public class FurnitureRequestDto extends ProductRequestDto {
     private String furnitureMaterial;
     @NotBlank(message = "furniture type is required")
     private String furnitureType;
-    @NotBlank(message = "furniture category is required")
-    private String furnitureCategory;
 
-    public FurnitureRequestDto(String name, String type, Double price, String description, Long categoryId, String furnitureMaterial, String furnitureType, String furnitureCategory) {
-        super(name, type, price, description, categoryId);
+    public FurnitureRequestDto(String name, String type, Double price, String description, String furnitureMaterial, String furnitureType) {
+        super(name, type, price, description);
         this.furnitureMaterial = furnitureMaterial;
         this.furnitureType = furnitureType;
-        this.furnitureCategory = furnitureCategory;
     }
 
     public String getFurnitureMaterial() {
@@ -32,13 +29,5 @@ public class FurnitureRequestDto extends ProductRequestDto {
 
     public void setFurnitureType(String furnitureType) {
         this.furnitureType = furnitureType;
-    }
-
-    public String getFurnitureCategory() {
-        return furnitureCategory;
-    }
-
-    public void setFurnitureCategory(String furnitureCategory) {
-        this.furnitureCategory = furnitureCategory;
     }
 }

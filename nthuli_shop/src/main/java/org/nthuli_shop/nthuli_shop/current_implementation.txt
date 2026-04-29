@@ -1,0 +1,33 @@
+current implementation:
+
+1.) Shoe material: leather, converse, sneakers
+2.) Shoe gender: male, female, unisex
+
+3.) Kitchen appliance function: cutting, serving, cooking, other
+
+4.) Furniture category: Home, Office
+5.) Furniture type: 
+   Home Furniture: bed, sofas, dining_set, dining_table, dining_chair, home_other
+   Office Furniture: office_chair, boardroom_table, workstation, office_sofa, office_desk, office_other
+6.) Furniture material: wood, plastic, metal
+
+7.) Clothes type: shirt, t_shirt, dress, skirt, short, trouser, jacket, vest, sweaters
+8.) Clothes material: cotton, wool, polyester
+9.) Clothes gender: male, female, unisex
+
+=== REFACTORING COMPLETED ===
+✅ Removed categoryId from all ProductRequestDto and subclasses
+✅ Category is now auto-looked up by product type name
+✅ Removed furnitureCategory from FurnitureRequestDto
+✅ FurnitureCategory is now auto-inferred from FurnitureTypeEnum
+✅ Added getCategory() method to FurnitureTypeEnum for automatic inference
+✅ Updated ProductService to use getCategoryByProductType() instead of getCategory(Long)
+
+DATABASE REQUIREMENT:
+The following categories must be pre-created in the category table:
+- SHOES
+- FURNITURE
+- CLOTHES
+- KITCHEN_APPLIANCES
+
+These category names must exactly match the ProductType enum names (case-sensitive lookup)

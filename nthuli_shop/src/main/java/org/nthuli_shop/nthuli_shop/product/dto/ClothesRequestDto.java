@@ -11,8 +11,8 @@ public class ClothesRequestDto extends ProductRequestDto {
     @NotBlank(message = "clothe type is required")
     private String clotheType;
 
-    public ClothesRequestDto(String name, String type, Double price, String description, Long categoryId, String clotheGender, String clotheMaterial, String clotheType) {
-        super(name, type, price, description, categoryId);
+    public ClothesRequestDto(String name, String type, Double price, String description, String clotheGender, String clotheMaterial, String clotheType) {
+        super(name, type, price, description);
         this.clotheGender = clotheGender;
         this.clotheMaterial = clotheMaterial;
         this.clotheType = clotheType;

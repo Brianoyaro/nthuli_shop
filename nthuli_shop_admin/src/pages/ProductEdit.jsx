@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useProduct, useCategories, useUpdateProduct } from '../hooks/useApi';
-import { getProductSchemaForType, PRODUCT_TYPE_OPTIONS, GENDER_OPTIONS, SHOE_MATERIAL_OPTIONS, CLOTHES_MATERIAL_OPTIONS, CLOTHES_TYPE_OPTIONS, FURNITURE_CATEGORY_OPTIONS, FURNITURE_MATERIAL_OPTIONS, FURNITURE_TYPE_OPTIONS, KITCHEN_APPLIANCE_FUNCTION_OPTIONS } from '../schemas/validationSchemas';
+import { getProductSchemaForType, PRODUCT_TYPE_OPTIONS, GENDER_OPTIONS, SHOE_MATERIAL_OPTIONS, CLOTHES_MATERIAL_OPTIONS, CLOTHES_TYPE_OPTIONS, FURNITURE_MATERIAL_OPTIONS, FURNITURE_TYPE_OPTIONS, KITCHEN_APPLIANCE_FUNCTION_OPTIONS } from '../schemas/validationSchemas';
 
 const ProductEdit = () => {
   const { id } = useParams();
@@ -28,13 +28,12 @@ const ProductEdit = () => {
     mode: 'onChange',
     defaultValues: product ? {
       type: product.type,
-      categoryId: String(product.categoryId || ''),
       name: product.name || '',
       description: product.description || '',
       price: String(product.price || ''),
       ...(product.type === 'SHOES' && { gender: product.gender, material: product.material }),
       ...(product.type === 'CLOTHES' && { clotheGender: product.clotheGender, clotheMaterial: product.clotheMaterial, clotheType: product.clotheType }),
-      ...(product.type === 'FURNITURE' && { furnitureCategory: product.furnitureCategory, furnitureMaterial: product.furnitureMaterial, furnitureType: product.furnitureType }),
+      ...(product.type === 'FURNITURE' && { furnitureMaterial: product.furnitureMaterial, furnitureType: product.furnitureType }),
       ...(product.type === 'KITCHEN_APPLIANCE' && { wattage: String(product.wattage || ''), applianceFunction: product.applianceFunction }),
     } : undefined,
   });
@@ -45,6 +44,7 @@ const ProductEdit = () => {
   if (product && !selectedType) {
     setSelectedType(product.type);
     setExistingImages(product.images || []);
+    console.log('Loaded product:', product);
   }
 
   // Image handling
@@ -120,11 +120,45 @@ const ProductEdit = () => {
     }
 
     try {
-      const allImages = [...existingImages, ...selectedImages];
+      // Extract IDs of images to keep
+      const imagesToKeep = existingImages.map(img => img.id);
+
+      // Prepare product data - ensure all fields are included
+      const productData = {
+        ...data,
+        price: parseFloat(data.price),
+        imagesToKeep, // Include imagesToKeep in productData so it gets serialized with the JSON
+      };
+
+      // Remove type-specific fields that aren't for the selected type
+      if (data.type !== 'SHOES') {
+        delete productData.gender;
+        delete productData.material;
+      }
+      if (data.type !== 'CLOTHES') {
+        delete productData.clotheGender;
+        delete productData.clotheMaterial;
+        delete productData.clotheType;
+      }
+      if (data.type !== 'FURNITURE') {
+        delete productData.furnitureMaterial;
+        delete productData.furnitureType;
+      }
+      if (data.type !== 'KITCHEN_APPLIANCE') {
+        delete productData.wattage;
+        delete productData.applianceFunction;
+      }
+
+      console.log(`selectedImages (new):`, selectedImages);
+      console.log(`existingImages (to keep):`, existingImages);
+      console.log(`imagesToKeep (IDs):`, imagesToKeep);
+      console.log(`productData sent:`, productData);
+
       await updateProductMutation.mutateAsync({
         id,
-        productData: data,
-        images: allImages,
+        productData,
+        newImages: selectedImages,
+        primaryIndex: 0,
       });
       navigate(`/product/${id}`);
     } catch (error) {
@@ -245,25 +279,7 @@ const ProductEdit = () => {
       case 'FURNITURE':
         return (
           <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-              <Controller
-                name="furnitureCategory"
-                control={control}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Category</option>
-                    {FURNITURE_CATEGORY_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                )}
-              />
-              {errors.furnitureCategory && <p className="text-red-600 text-sm mt-1">{errors.furnitureCategory.message}</p>}
-            </div>
+          
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Material *</label>
@@ -517,28 +533,7 @@ const ProductEdit = () => {
                 </div>
               </div>
 
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
-                </label>
-                <Controller
-                  name="categoryId"
-                  control={control}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select Category</option>
-                      {categories?.map(cat => (
-                        <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.categoryId && <p className="text-red-600 text-sm mt-1">{errors.categoryId.message}</p>}
-              </div>
+            
 
               {/* Product Name */}
               <div>

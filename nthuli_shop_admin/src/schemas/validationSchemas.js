@@ -27,8 +27,6 @@ const baseProductSchema = {
     'FURNITURE',
     'KITCHEN_APPLIANCE',
   ], { message: 'Invalid product type' }),
-  categoryId: z.coerce.number()
-    .positive('Category ID must be positive'),
 };
 
 // Type-specific product schemas
@@ -50,7 +48,6 @@ export const clothesSchema = z.object({
 export const furnitureSchema = z.object({
   ...baseProductSchema,
   type: z.literal('FURNITURE'),
-  furnitureCategory: z.string().min(1, 'Please select a furniture category'),
   furnitureMaterial: z.string().min(1, 'Please select a material'),
   furnitureType: z.string().min(1, 'Please select a furniture type'),
 });
@@ -114,10 +111,6 @@ export const FURNITURE_MATERIAL_OPTIONS = [
   { value: 'PLASTIC', label: 'Plastic' },
 ];
 
-export const FURNITURE_CATEGORY_OPTIONS = [
-  { value: 'HOME', label: 'Home' },
-  { value: 'OFFICE', label: 'Office' },
-];
 
 export const FURNITURE_TYPE_OPTIONS = [
   { value: 'BED', label: 'Bed' },

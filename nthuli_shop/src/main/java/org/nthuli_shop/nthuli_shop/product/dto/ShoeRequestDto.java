@@ -8,8 +8,8 @@ public class ShoeRequestDto extends ProductRequestDto {
     @NotBlank(message = "shoe material is required")
     private String material;
 
-    public ShoeRequestDto(String name, String type, Double price, String description, Long categoryId, String gender, String material) {
-        super(name, type, price, description, categoryId);
+    public ShoeRequestDto(String name, String type, Double price, String description, String gender, String material) {
+        super(name, type, price, description);
         this.material = material;
         this.gender = gender;
     }

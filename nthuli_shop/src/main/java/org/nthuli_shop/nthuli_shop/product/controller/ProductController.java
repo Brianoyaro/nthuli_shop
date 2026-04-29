@@ -103,14 +103,15 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(
             @PathVariable Long id,
             @RequestPart("product") String productJson,
-            @Valid @RequestPart("images") List<MultipartFile> images,
-            @Valid @RequestParam(defaultValue = "0") Integer primaryIndex
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestParam(defaultValue = "0") Integer primaryIndex
     ) {
         // update a product
-        logger.info("PUT /api/products/{} - Update request with {} images", id, images.size());
+        logger.info("PUT /api/products/{} - Update request with {} images", id, images != null ? images.size() : 0);
         try {
             ProductRequestDto request = objectMapper.readValue(productJson, ProductRequestDto.class);
             logger.debug("Product request parsed - Name: {}, Type: {}", request.getName(), request.getType());
+            
             ProductResponseDto response = productService.updateProduct(id, request, images, primaryIndex);
             logger.info("Product updated successfully - ID: {}", id);
             return ResponseEntity.ok(response);

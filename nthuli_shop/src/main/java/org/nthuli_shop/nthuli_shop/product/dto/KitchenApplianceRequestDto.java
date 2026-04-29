@@ -9,8 +9,8 @@ public class KitchenApplianceRequestDto extends ProductRequestDto {
     @NotBlank(message = "kitchen appliance function is required")
     private String applianceFunction;
 
-    public KitchenApplianceRequestDto(String name, String type, Double price, String description, Long categoryId, Double wattage, String applianceFunction) {
-        super(name, type, price, description, categoryId);
+    public KitchenApplianceRequestDto(String name, String type, Double price, String description, Double wattage, String applianceFunction) {
+        super(name, type, price, description);
         this.wattage = wattage;
         this.applianceFunction = applianceFunction;
     }

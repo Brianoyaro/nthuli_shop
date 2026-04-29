@@ -78,7 +78,6 @@ export default function ProductDetail() {
         return {
           title: 'Furniture Details',
           fields: [
-            { label: 'Category', value: product.furnitureCategory },
             { label: 'Material', value: product.furnitureMaterial },
             { label: 'Type', value: product.furnitureType },
           ],
@@ -157,13 +156,6 @@ export default function ProductDetail() {
                     Price
                   </label>
                   <p className="text-3xl font-bold text-blue-600">{formatPrice(product.price)}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
-                  <p className="text-gray-900">{product.categoryName}</p>
                 </div>
 
                 <div>

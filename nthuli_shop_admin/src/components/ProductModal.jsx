@@ -91,13 +91,13 @@ export default function ProductModal({
 
       const productData = {
         ...data,
-        categoryId: parseInt(data.categoryId),
+        categoryId: data.categoryId ? parseInt(data.categoryId) : null,
         price: parseFloat(data.price),
       };
 
       console.log('Product data before cleanup:', productData);
 
-      // Remove empty fields based on type - keep ONLY fields for the selected type
+      // Remove type-specific fields that aren't for the selected type
       if (data.type !== 'SHOES') {
         delete productData.gender;
         delete productData.material;
@@ -108,7 +108,6 @@ export default function ProductModal({
         delete productData.clotheType;
       }
       if (data.type !== 'FURNITURE') {
-        delete productData.furnitureCategory;
         delete productData.furnitureMaterial;
         delete productData.furnitureType;
       }
@@ -126,10 +125,14 @@ export default function ProductModal({
           primaryIndex: 0,
         });
       } else {
+        // For updates, include imagesToKeep in productData
+        const imagesToKeep = (product.images || []).map(img => img.id);
+        productData.imagesToKeep = imagesToKeep;
         await updateMutation.mutateAsync({
           id: product.id,
           productData,
-          images: imageFiles.length > 0 ? imageFiles : [new File([], '')],
+          newImages: imageFiles,
+          primaryIndex: 0,
         });
       }
       reset();
@@ -254,7 +257,7 @@ export default function ProductModal({
           {/* Category Select */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
+              Category (Optional - inferred from product type)
             </label>
             <select
               {...register('categoryId')}

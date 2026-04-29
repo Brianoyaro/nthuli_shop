@@ -85,8 +85,8 @@ export const useCreateProduct = () => {
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, productData, images }) =>
-      productAPI.updateProduct(id, productData, images),
+    mutationFn: ({ id, productData, newImages, primaryIndex }) =>
+      productAPI.updateProduct(id, productData, newImages, primaryIndex),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
