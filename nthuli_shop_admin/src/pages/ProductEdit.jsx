@@ -408,7 +408,111 @@ const ProductEdit = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8">
+          {/* Right Column: Form */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Product Type (Read-only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Type
+                </label>
+                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-900 font-medium">
+                  {typeValue}
+                </div>
+              </div>
+
+            
+
+              {/* Product Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="text"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter product name"
+                    />
+                  )}
+                />
+                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>}
+              </div>
+
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter price"
+                    />
+                  )}
+                />
+                {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price.message}</p>}
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <textarea
+                      {...field}
+                      rows="4"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter product description"
+                    />
+                  )}
+                />
+                {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description.message}</p>}
+              </div>
+
+              {/* Type-Specific Fields */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {typeValue === 'SHOES' ? 'Shoe Details' :
+                   typeValue === 'CLOTHES' ? 'Clothes Details' :
+                   typeValue === 'FURNITURE' ? 'Furniture Details' :
+                   'Kitchen Appliance Details'}
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {renderTypeSpecificFields()}
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-4 pt-6 border-t">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/product/${id}`)}
+                  className="flex-1 px-6 py-2 bg-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateProductMutation.isPending}
+                  className="flex-1 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {updateProductMutation.isPending ? 'Updating...' : 'Update Product'}
+                </button>
+              </div>
+            </form>
+          </div>
+
           {/* Left Column: Images */}
           <div className="space-y-6">
             {/* Existing Images */}
@@ -518,110 +622,6 @@ const ProductEdit = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Right Column: Form */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Product Type (Read-only) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Type
-                </label>
-                <div className="px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-900 font-medium">
-                  {typeValue}
-                </div>
-              </div>
-
-            
-
-              {/* Product Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      type="text"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter product name"
-                    />
-                  )}
-                />
-                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>}
-              </div>
-
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price *</label>
-                <Controller
-                  name="price"
-                  control={control}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter price"
-                    />
-                  )}
-                />
-                {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price.message}</p>}
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <textarea
-                      {...field}
-                      rows="4"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter product description"
-                    />
-                  )}
-                />
-                {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description.message}</p>}
-              </div>
-
-              {/* Type-Specific Fields */}
-              <div className="border-t pt-6 space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {typeValue === 'SHOES' ? 'Shoe Details' :
-                   typeValue === 'CLOTHES' ? 'Clothes Details' :
-                   typeValue === 'FURNITURE' ? 'Furniture Details' :
-                   'Kitchen Appliance Details'}
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {renderTypeSpecificFields()}
-                </div>
-              </div>
-
-              {/* Submit Buttons */}
-              <div className="flex gap-4 pt-6 border-t">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/product/${id}`)}
-                  className="flex-1 px-6 py-2 bg-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-400 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updateProductMutation.isPending}
-                  className="flex-1 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  {updateProductMutation.isPending ? 'Updating...' : 'Update Product'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </div>
