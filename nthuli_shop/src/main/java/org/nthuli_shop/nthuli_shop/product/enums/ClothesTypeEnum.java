@@ -9,4 +9,5 @@ public enum ClothesTypeEnum {
     TROUSER,
     JACKET,
     VEST,
+    SWEATERS,
 }

@@ -166,8 +166,8 @@ public class ProductService {
     }
 
     private Product createFurnitureEntity(FurnitureRequestDto request) {
-        logger.debug("Creating furniture entity with name: {}, type: {}, material: {}", 
-            request.getName(), request.getFurnitureType(), request.getFurnitureMaterial());
+        logger.debug("Creating furniture entity with name: {}, type: {}, material: {}, category: {}", 
+            request.getName(), request.getFurnitureType(), request.getFurnitureMaterial(), request.getFurnitureCategory());
         Category category = getCategory(request.getCategoryId());
 
         Product product = new Product();
@@ -182,6 +182,9 @@ public class ProductService {
         );
         product.setFurnitureType(
                 FurnitureTypeEnum.valueOf(request.getFurnitureType())
+        );
+        product.setFurnitureCategory(
+                FurnitureCategoryEnum.valueOf(request.getFurnitureCategory())
         );
 
         logger.debug("Furniture entity created with type: FURNITURE");
@@ -311,6 +314,10 @@ public class ProductService {
                     logger.debug("Updating furniture type to: {}", ((FurnitureRequestDto) request).getFurnitureType());
                     product.setFurnitureType(FurnitureTypeEnum.valueOf(((FurnitureRequestDto) request).getFurnitureType()));
                 }
+                if (((FurnitureRequestDto) request).getFurnitureCategory() != null && !(((FurnitureRequestDto) request).getFurnitureCategory().trim().isEmpty())) {
+                    logger.debug("Updating furniture category to: {}", ((FurnitureRequestDto) request).getFurnitureCategory());
+                    product.setFurnitureCategory(FurnitureCategoryEnum.valueOf(((FurnitureRequestDto) request).getFurnitureCategory()));
+                }
             }
             case ProductType.CLOTHES -> {
                 request = (ClothesRequestDto) request;
@@ -393,6 +400,7 @@ public class ProductService {
 
         response.setFurnitureMaterial(product.getFurnitureMaterial().name());
         response.setFurnitureType(product.getFurnitureType().name());
+        response.setFurnitureCategory(product.getFurnitureCategory().name());
 
         return response;
     }

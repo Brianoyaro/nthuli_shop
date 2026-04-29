@@ -1,8 +1,18 @@
 package org.nthuli_shop.nthuli_shop.product.enums;
 
 public enum FurnitureTypeEnum {
-    TABLE,
-    CHAIR,
+    // Home Furniture Types
     BED,
-    STAND,
+    SOFAS,
+    DINING_SET,
+    DINING_TABLE,
+    DINING_CHAIR,
+    HOME_OTHER,
+    // Office Furniture Types
+    OFFICE_CHAIR,
+    BOARDROOM_TABLE,
+    WORKSTATION,
+    OFFICE_SOFA,
+    OFFICE_DESK,
+    OFFICE_OTHER,
 }
