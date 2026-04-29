@@ -107,30 +107,59 @@ export default function Dashboard() {
         {/* Products by Category Section */}
         {Object.keys(products).length > 0 ? (
           <div className="space-y-8">
-            {Object.keys(products).map((category) => (
-              <div key={category} className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-200">
-                  {category}
-                </h2>
+            {Object.keys(products).map((category) => {
+              const categoryProducts = products[category];
+              // Find the category ID by matching with any product's categoryName
+              const categoryId = categoryProducts.length > 0 
+                ? categories.find(c => c.name === categoryProducts[0].categoryName)?.id 
+                : null;
+              const itemsPerPage = 6;
+              const displayedProducts = categoryProducts.slice(0, itemsPerPage);
+              const hasMore = categoryProducts.length > itemsPerPage;
 
-                {products[category].length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {products[category].map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        onViewDetail={handleViewProductDetail}
-                        formatPrice={formatPrice}
-                      />
-                    ))}
+              return (
+                <div key={category} className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-200">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {category}
+                    </h2>
+                    <span className="text-sm text-gray-500">
+                      {categoryProducts.length} items
+                    </span>
                   </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    No products in this category.
-                  </p>
-                )}
-              </div>
-            ))}
+
+                  {displayedProducts.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {displayedProducts.map((product) => (
+                          <ProductCard
+                            key={product.id}
+                            product={product}
+                            onViewDetail={handleViewProductDetail}
+                            formatPrice={formatPrice}
+                          />
+                        ))}
+                      </div>
+
+                      {hasMore && (
+                        <div className="mt-6 text-center">
+                          <button
+                            onClick={() => categoryId && navigate(`/category/${categoryId}`)}
+                            className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+                          >
+                            View All ({categoryProducts.length})
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-gray-500 text-center py-8">
+                      No products in this category.
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -180,10 +209,10 @@ function ProductCard({ product, onViewDetail, formatPrice }) {
   return (
     <div
       onClick={() => onViewDetail(product)}
-      className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer border border-gray-200 hover:border-blue-500"
+      className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition duration-300 cursor-pointer border border-gray-200 hover:border-blue-500 flex flex-col"
     >
       {/* Image Container */}
-      <div className="h-48 bg-gray-200 overflow-hidden">
+      <div className="h-32 bg-gray-200 overflow-hidden flex-shrink-0">
         {primaryImage && fullImageUrl && !imageError ? (
           <img
             src={fullImageUrl}
@@ -192,37 +221,37 @@ function ProductCard({ product, onViewDetail, formatPrice }) {
             className="w-full h-full object-cover hover:scale-105 transition duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
-            {imageError ? '⚠️ Image Error' : 'No Image'}
+          <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 text-xs">
+            {imageError ? '⚠️ Error' : 'No Image'}
           </div>
         )}
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
-        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
+      <div className="p-3 flex flex-col flex-grow">
+        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
           {product.name}
         </h3>
 
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="text-gray-600 text-xs mb-2 line-clamp-1">
           {product.description}
         </p>
 
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-2xl font-bold text-blue-600">
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <span className="text-lg font-bold text-blue-600">
             {formatPrice(product.price)}
           </span>
-          <span className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-semibold">
+          <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold flex-shrink-0">
             {product.type}
           </span>
         </div>
 
-        <div className="text-xs text-gray-500">
-          Category: {product.categoryName}
+        <div className="text-xs text-gray-500 mb-2 line-clamp-1">
+          {product.categoryName}
         </div>
 
-        <div className="mt-3 p-2 bg-blue-50 rounded text-center text-xs font-semibold text-blue-700">
-          Click to View Details
+        <div className="mt-auto p-1.5 bg-blue-50 rounded text-center text-xs font-semibold text-blue-700">
+          View Details
         </div>
       </div>
     </div>
