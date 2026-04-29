@@ -50,6 +50,7 @@ export const clothesSchema = z.object({
 export const furnitureSchema = z.object({
   ...baseProductSchema,
   type: z.literal('FURNITURE'),
+  furnitureCategory: z.string().min(1, 'Please select a furniture category'),
   furnitureMaterial: z.string().min(1, 'Please select a material'),
   furnitureType: z.string().min(1, 'Please select a furniture type'),
 });
@@ -86,7 +87,8 @@ export const GENDER_OPTIONS = [
 
 export const SHOE_MATERIAL_OPTIONS = [
   { value: 'LEATHER', label: 'Leather' },
-  { value: 'CONVERSE',label: 'Converse' },
+  { value: 'CONVERSE', label: 'Converse' },
+  { value: 'SNEAKERS', label: 'Sneakers' },
 ];
 
 export const CLOTHES_MATERIAL_OPTIONS = [
@@ -112,11 +114,25 @@ export const FURNITURE_MATERIAL_OPTIONS = [
   { value: 'PLASTIC', label: 'Plastic' },
 ];
 
+export const FURNITURE_CATEGORY_OPTIONS = [
+  { value: 'HOME', label: 'Home' },
+  { value: 'OFFICE', label: 'Office' },
+];
+
 export const FURNITURE_TYPE_OPTIONS = [
-  { value: 'CHAIR', label: 'Chair' },
-  { value: 'TABLE', label: 'Table' },
-  { value: 'STAND', label: 'Stand' },
-  { value: 'BED', label: 'Bed' },];
+  { value: 'BED', label: 'Bed' },
+  { value: 'SOFAS', label: 'Sofas' },
+  { value: 'DINING_SET', label: 'Dining Set' },
+  { value: 'DINING_TABLE', label: 'Dining Table' },
+  { value: 'DINING_CHAIR', label: 'Dining Chair' },
+  { value: 'HOME_OTHER', label: 'Home - Other' },
+  { value: 'OFFICE_CHAIR', label: 'Office Chair' },
+  { value: 'BOARDROOM_TABLE', label: 'Boardroom Table' },
+  { value: 'WORKSTATION', label: 'Workstation' },
+  { value: 'OFFICE_SOFA', label: 'Office Sofa' },
+  { value: 'OFFICE_DESK', label: 'Office Desk' },
+  { value: 'OFFICE_OTHER', label: 'Office - Other' },
+];
 
 export const KITCHEN_APPLIANCE_FUNCTION_OPTIONS = [
   { value: 'CUTTING', label: 'Cutting' },

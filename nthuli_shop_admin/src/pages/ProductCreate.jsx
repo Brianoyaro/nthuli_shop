@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCategories, useCreateProduct } from '../hooks/useApi';
-import { getProductSchemaForType, PRODUCT_TYPE_OPTIONS, GENDER_OPTIONS, SHOE_MATERIAL_OPTIONS, CLOTHES_MATERIAL_OPTIONS, CLOTHES_TYPE_OPTIONS, FURNITURE_MATERIAL_OPTIONS, FURNITURE_TYPE_OPTIONS, KITCHEN_APPLIANCE_FUNCTION_OPTIONS } from '../schemas/validationSchemas';
+import { getProductSchemaForType, PRODUCT_TYPE_OPTIONS, GENDER_OPTIONS, SHOE_MATERIAL_OPTIONS, CLOTHES_MATERIAL_OPTIONS, CLOTHES_TYPE_OPTIONS, FURNITURE_CATEGORY_OPTIONS, FURNITURE_MATERIAL_OPTIONS, FURNITURE_TYPE_OPTIONS, KITCHEN_APPLIANCE_FUNCTION_OPTIONS } from '../schemas/validationSchemas';
 
 const ProductCreate = () => {
   const navigate = useNavigate();
@@ -218,6 +218,26 @@ const ProductCreate = () => {
       case 'FURNITURE':
         return (
           <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+              <Controller
+                name="furnitureCategory"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Category</option>
+                    {FURNITURE_CATEGORY_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                )}
+              />
+              {errors.furnitureCategory && <p className="text-red-600 text-sm mt-1">{errors.furnitureCategory.message}</p>}
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Material *</label>
               <Controller

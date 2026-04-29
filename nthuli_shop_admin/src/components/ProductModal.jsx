@@ -7,6 +7,7 @@ import {
   SHOE_MATERIAL_OPTIONS,
   CLOTHES_MATERIAL_OPTIONS,
   CLOTHES_TYPE_OPTIONS,
+  FURNITURE_CATEGORY_OPTIONS,
   FURNITURE_MATERIAL_OPTIONS,
   FURNITURE_TYPE_OPTIONS,
   KITCHEN_APPLIANCE_FUNCTION_OPTIONS,
@@ -53,6 +54,7 @@ export default function ProductModal({
       clotheMaterial: product?.clotheMaterial || '',
       clotheType: product?.clotheType || '',
       // Furniture fields
+      furnitureCategory: product?.furnitureCategory || '',
       furnitureMaterial: product?.furnitureMaterial || '',
       furnitureType: product?.furnitureType || '',
       // Kitchen appliance fields
@@ -106,6 +108,7 @@ export default function ProductModal({
         delete productData.clotheType;
       }
       if (data.type !== 'FURNITURE') {
+        delete productData.furnitureCategory;
         delete productData.furnitureMaterial;
         delete productData.furnitureType;
       }
@@ -392,6 +395,26 @@ export default function ProductModal({
           {typeValue === 'FURNITURE' && (
             <div className="border-t-2 border-gray-200 pt-4 mt-4">
               <h3 className="font-semibold text-gray-700 mb-3">Furniture Details</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  {...register('furnitureCategory')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  disabled={isLoading}
+                >
+                  <option value="">Select furniture category</option>
+                  {FURNITURE_CATEGORY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.furnitureCategory && (
+                  <p className="text-red-500 text-sm mt-1">{errors.furnitureCategory.message}</p>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

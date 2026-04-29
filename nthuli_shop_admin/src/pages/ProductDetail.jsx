@@ -78,6 +78,7 @@ export default function ProductDetail() {
         return {
           title: 'Furniture Details',
           fields: [
+            { label: 'Category', value: product.furnitureCategory },
             { label: 'Material', value: product.furnitureMaterial },
             { label: 'Type', value: product.furnitureType },
           ],
