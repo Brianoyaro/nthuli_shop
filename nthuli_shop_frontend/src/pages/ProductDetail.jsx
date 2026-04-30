@@ -5,6 +5,7 @@ import { useCartStore } from '../store/cartStore';
 import { useToast } from '../context/ToastContext';
 import { ImageGallery } from '../components/ImageGallery';
 import { ProductCard } from '../components/ProductCard';
+import { ProductAttributesDisplay } from '../components/ProductAttributesDisplay';
 import { productsAPI } from '../services/api';
 
 export function ProductDetail() {
@@ -158,36 +159,18 @@ export function ProductDetail() {
               </p>
             </div>
 
-            {/* Product Details */}
-            {(product.attributes?.material || product.attributes?.gender || product.clotheMaterial || product.clotheGender) && (
-              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                <h3 className="font-semibold text-gray-900 mb-3">Product Details</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {(product.attributes?.material || product.clotheMaterial) && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Material</p>
-                      <p className="text-gray-900 font-semibold">{product.attributes?.material || product.clotheMaterial}</p>
-                    </div>
-                  )}
-                  {(product.attributes?.gender || product.clotheGender || product.gender) && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Gender</p>
-                      <p className="text-gray-900 font-semibold capitalize">{product.attributes?.gender || product.clotheGender || product.gender}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Product Specifications - Comprehensive Display */}
+            <ProductAttributesDisplay product={product} />
 
             {/* Available Sizes */}
-            {product.attributes?.sizes && (
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Available Sizes</h3>
+            {product.attributes?.sizes && product.attributes.sizes.length > 0 && (
+              <div className="border-t pt-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Available Sizes</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.attributes.sizes.map(size => (
                     <button
                       key={size}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-600 hover:text-blue-600 transition-all font-medium"
+                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 transition-all font-medium text-sm"
                     >
                       {size}
                     </button>
@@ -197,14 +180,14 @@ export function ProductDetail() {
             )}
 
             {/* Available Colors */}
-            {product.attributes?.colors && (
+            {product.attributes?.colors && product.attributes.colors.length > 0 && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Available Colors</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">Available Colors</h3>
                 <div className="flex flex-wrap gap-3">
                   {product.attributes.colors.map(color => (
                     <button
                       key={color}
-                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-600 transition-all font-medium"
+                      className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-all font-medium text-sm"
                     >
                       {color}
                     </button>
@@ -260,12 +243,12 @@ export function ProductDetail() {
               </button>
             </div>
 
-            {/* Trust Signals */}
+            {/* Trust Signals
             <div className="bg-blue-50 rounded-lg p-4">
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-3">
                   <span className="text-blue-600 font-bold mt-1">✓</span>
-                  <span className="text-gray-700">Free shipping on orders over KSH 50</span>
+                  <span className="text-gray-700">Free shipping on orders over KSH 2000</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-blue-600 font-bold mt-1">✓</span>
@@ -276,7 +259,7 @@ export function ProductDetail() {
                   <span className="text-gray-700">Secure checkout with SSL encryption</span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

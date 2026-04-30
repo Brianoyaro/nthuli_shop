@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FaShoppingCart, FaCheckCircle } from 'react-icons/fa';
+import { FaShoppingCart, FaCheckCircle, FaCreditCard, FaMobileAlt, FaLock } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
 import { Button } from '../components/Button';
 import { checkoutFormSchema } from '../schemas/validation';
@@ -13,6 +13,7 @@ export function Checkout() {
   const getCartTotal = useCartStore(state => state.getCartTotal);
   const clearCart = useCartStore(state => state.clearCart);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' or 'mpesa'
 
   const {
     register,
@@ -228,55 +229,164 @@ export function Checkout() {
                 </div>
               </div>
 
-              {/* Payment Information */}
+              {/* Payment Method Selection */}
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Information</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Method</h2>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Card Number *
-                  </label>
-                  <input
-                    {...register('cardNumber')}
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.cardNumber && (
-                    <p className="text-red-600 text-sm mt-1">{errors.cardNumber.message}</p>
-                  )}
+                {/* Payment Method Options */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  {/* Card Payment Option */}
+                  <button
+                    onClick={() => setPaymentMethod('card')}
+                    className={`relative p-5 rounded-xl border-2 transition-all duration-200 ${
+                      paymentMethod === 'card'
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-lg ${paymentMethod === 'card' ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                        <FaCreditCard className={`text-lg ${paymentMethod === 'card' ? 'text-white' : 'text-gray-600'}`} />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">Card Payment</p>
+                        <p className="text-sm text-gray-600">Visa, Mastercard, etc.</p>
+                      </div>
+                    </div>
+                    {paymentMethod === 'card' && (
+                      <div className="absolute top-3 right-3 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* M-Pesa Payment Option */}
+                  <button
+                    onClick={() => setPaymentMethod('mpesa')}
+                    className={`relative p-5 rounded-xl border-2 transition-all duration-200 ${
+                      paymentMethod === 'mpesa'
+                        ? 'border-green-600 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-lg ${paymentMethod === 'mpesa' ? 'bg-green-600' : 'bg-gray-200'}`}>
+                        <FaMobileAlt className={`text-lg ${paymentMethod === 'mpesa' ? 'text-white' : 'text-gray-600'}`} />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">M-Pesa</p>
+                        <p className="text-sm text-gray-600">Mobile money</p>
+                      </div>
+                    </div>
+                    {paymentMethod === 'mpesa' && (
+                      <div className="absolute top-3 right-3 w-5 h-5 bg-green-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">✓</span>
+                      </div>
+                    )}
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Expiry Date *
-                    </label>
-                    <input
-                      {...register('expiryDate')}
-                      type="text"
-                      placeholder="MM/YY"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errors.expiryDate && (
-                      <p className="text-red-600 text-sm mt-1">{errors.expiryDate.message}</p>
-                    )}
+                {/* Payment Method Form */}
+                {paymentMethod === 'card' && (
+                  <div className="space-y-4 border-t pt-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Card Number *
+                      </label>
+                      <div className="relative">
+                        <input
+                          {...register('cardNumber')}
+                          type="text"
+                          placeholder="1234 5678 9012 3456"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pl-10"
+                        />
+                        <FaCreditCard className="absolute left-3 top-3.5 text-gray-400" />
+                      </div>
+                      {errors.cardNumber && (
+                        <p className="text-red-600 text-sm mt-1">{errors.cardNumber.message}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Expiry Date *
+                        </label>
+                        <input
+                          {...register('expiryDate')}
+                          type="text"
+                          placeholder="MM/YY"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {errors.expiryDate && (
+                          <p className="text-red-600 text-sm mt-1">{errors.expiryDate.message}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          CVV *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('cvv')}
+                            type="text"
+                            placeholder="123"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <FaLock className="absolute right-3 top-3.5 text-gray-400" />
+                        </div>
+                        {errors.cvv && (
+                          <p className="text-red-600 text-sm mt-1">{errors.cvv.message}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Security Notice */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3">
+                      <FaLock className="text-blue-600" />
+                      <p className="text-sm text-blue-700">
+                        Your card information is secure and encrypted
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      CVV *
-                    </label>
-                    <input
-                      {...register('cvv')}
-                      type="text"
-                      placeholder="123"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {errors.cvv && (
-                      <p className="text-red-600 text-sm mt-1">{errors.cvv.message}</p>
-                    )}
+                )}
+
+                {paymentMethod === 'mpesa' && (
+                  <div className="space-y-4 border-t pt-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        M-Pesa Phone Number *
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-3 text-gray-600 font-medium">🇰🇪 +254</span>
+                        <input
+                          {...register('phone')}
+                          type="tel"
+                          placeholder="712 345 678"
+                          className="w-full px-4 py-3 pl-24 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2">
+                        Enter your M-Pesa registered phone number (without 254)
+                      </p>
+                      {errors.phone && (
+                        <p className="text-red-600 text-sm mt-1">{errors.phone.message}</p>
+                      )}
+                    </div>
+
+                    {/* M-Pesa Instructions */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
+                      <p className="font-semibold text-green-900">How to complete payment:</p>
+                      <ol className="text-sm text-green-800 list-decimal list-inside space-y-1">
+                        <li>Enter your M-Pesa phone number above</li>
+                        <li>Click "Complete Payment"</li>
+                        <li>You'll receive a prompt on your phone</li>
+                        <li>Enter your M-Pesa PIN to confirm</li>
+                        <li>Payment will be processed immediately</li>
+                      </ol>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -296,7 +406,7 @@ export function Checkout() {
                   className="flex-1"
                   type="submit"
                 >
-                  Place Order
+                  {paymentMethod === 'mpesa' ? 'Complete M-Pesa Payment' : 'Complete Card Payment'}
                 </Button>
               </div>
             </form>
@@ -304,55 +414,83 @@ export function Checkout() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8 space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900">Order Summary</h2>
 
               {/* Cart Items */}
-              <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
+              <div className="space-y-4 pb-6 border-b border-gray-200 max-h-64 overflow-y-auto scrollbar-hide">
                 {cart.map(item => (
                   <div key={item.id} className="flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{item.name}</p>
-                      <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                      <p className="font-medium text-gray-900 text-sm">{item.name}</p>
+                      <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-gray-900 text-sm">
                       KSH {(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
               </div>
 
-              {/* Pricing */}
-              <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
+              {/* Pricing Breakdown */}
+              <div className="space-y-3 pb-6 border-b border-gray-200">
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Subtotal</span>
-                  <span className="font-semibold">KSH {total.toFixed(2)}</span>
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-semibold text-gray-900">KSH {total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Shipping</span>
-                  <span className="font-semibold">
+                  <span className="text-gray-600">Shipping</span>
+                  <span className="font-semibold text-gray-900">
                     {shipping === 0 ? 'FREE' : `KSH ${shipping.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Tax</span>
-                  <span className="font-semibold">KSH {tax.toFixed(2)}</span>
+                  <span className="text-gray-600">Tax (10%)</span>
+                  <span className="font-semibold text-gray-900">KSH {tax.toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* Total */}
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-xl font-bold text-gray-900">Total</span>
-                <span className="text-2xl font-bold text-blue-600">
-                  KSH {finalTotal.toFixed(2)}
-                </span>
+              {/* Total Amount */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 text-white">
+                <p className="text-sm text-blue-100 mb-1">Total Amount to Pay</p>
+                <p className="text-3xl font-bold">KSH {finalTotal.toFixed(2)}</p>
               </div>
 
-              {/* Info */}
-              <div className="bg-blue-50 rounded-lg p-4 text-sm text-gray-700">
-                <p className="mb-2">
-                  <strong>Note:</strong> This is a demo checkout. Your payment information is not actually processed.
+              {/* Payment Method Badge */}
+              <div className={`rounded-lg p-3 flex items-center gap-2 ${
+                paymentMethod === 'card' 
+                  ? 'bg-blue-50 border border-blue-200' 
+                  : 'bg-green-50 border border-green-200'
+              }`}>
+                {paymentMethod === 'card' ? (
+                  <>
+                    <FaCreditCard className="text-blue-600" />
+                    <span className={`text-sm font-medium ${paymentMethod === 'card' ? 'text-blue-900' : 'text-green-900'}`}>
+                      Card Payment Selected
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <FaMobileAlt className="text-green-600" />
+                    <span className="text-sm font-medium text-green-900">
+                      M-Pesa Payment Selected
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Security Info */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3 border border-gray-200">
+                <div className="flex items-center gap-2">
+                  <FaLock className="text-green-600 text-sm" />
+                  <span className="text-xs text-gray-700 font-medium">Secure Payment</span>
+                </div>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Your payment information is encrypted and processed securely. We never store your full card details.
                 </p>
+                <div className="text-xs text-gray-500 flex items-center gap-1 pt-2 border-t border-gray-200">
+                  <span>🔒</span> SSL Secured Connection
+                </div>
               </div>
             </div>
           </div>
