@@ -1,5 +1,6 @@
 import { useCartStore } from '../store/cartStore';
 import { useToast } from '../context/ToastContext';
+import { IMAGE_BASE_URL } from '../services/api';
 
 export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
   const addToCart = useCartStore(state => state.addToCart);
@@ -13,7 +14,7 @@ export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
   // Get primary image or first image
   const primaryImage = product.images?.find(img => img.primary) || product.images?.[0];
   const imageUrl = primaryImage?.imageUrl
-    ? `http://localhost:8080${primaryImage.imageUrl}`
+    ? `${IMAGE_BASE_URL}${primaryImage.imageUrl}`
     : 'https://via.placeholder.com/300x300?text=No+Image';
 
   // Calculate discount (mock data - can be added to backend later)

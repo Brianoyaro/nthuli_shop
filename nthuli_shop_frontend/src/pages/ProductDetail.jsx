@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { ImageGallery } from '../components/ImageGallery';
 import { ProductCard } from '../components/ProductCard';
 import { ProductAttributesDisplay } from '../components/ProductAttributesDisplay';
-import { productsAPI } from '../services/api';
+import { productsAPI, IMAGE_BASE_URL } from '../services/api';
 
 export function ProductDetail() {
   const { id } = useParams();
@@ -66,7 +66,7 @@ export function ProductDetail() {
   }
 
   // Generate gallery images from product images
-  const galleryImages = product.images?.map(img => `http://localhost:8080${img.imageUrl}`) || [
+  const galleryImages = product.images?.map(img => `${IMAGE_BASE_URL}${img.imageUrl}`) || [
     'https://via.placeholder.com/500x600?text=Product+Image'
   ];
 

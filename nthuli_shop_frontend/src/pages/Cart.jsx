@@ -3,6 +3,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { IMAGE_BASE_URL } from '../services/api';
 
 export function Cart() {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export function Cart() {
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0">
                   <img
-                    src={`http://localhost:8080${item.image}`}
+                    src={`${IMAGE_BASE_URL}${item.image}`}
                     alt={item.name}
                     className="w-full h-full object-cover rounded-lg"
                   />

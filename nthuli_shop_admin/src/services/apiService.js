@@ -11,7 +11,7 @@ const apiClient = axios.create({
 
 // API Service for Products
 export const productAPI = {
-  // Get all products grouped by category
+  // Get all products
   getAllProducts: () => apiClient.get('/api/products'),
 
   // Get single product
@@ -20,15 +20,16 @@ export const productAPI = {
   // Create product with images
   createProduct: (productData, images, primaryIndex = 0) => {
     const formData = new FormData();
-    formData.append('product', JSON.stringify(productData));
+    formData.append('name', productData.name);
+    formData.append('description', productData.description);
+    formData.append('price', productData.price);
+    formData.append('categoryId', productData.categoryId);
+    
     images.forEach((image) => {
       formData.append('images', image);
     });
-    formData.append('primaryIndex', primaryIndex);
 
-    console.log('Creating product with data:', productData);
-    
-    return apiClient.post('/api/products/create', formData, {
+    return apiClient.post('/api/products', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -38,8 +39,10 @@ export const productAPI = {
   // Update product with images
   updateProduct: (id, productData, newImages, primaryIndex = 0) => {
     const formData = new FormData();
-    // productData already includes imagesToKeep array, so it will be JSON stringified together
-    formData.append('product', JSON.stringify(productData));
+    formData.append('name', productData.name);
+    formData.append('description', productData.description);
+    formData.append('price', productData.price);
+    formData.append('categoryId', productData.categoryId);
     
     // Add only new images
     newImages.forEach((image) => {
@@ -47,8 +50,6 @@ export const productAPI = {
         formData.append('images', image);
       }
     });
-    
-    formData.append('primaryIndex', primaryIndex);
 
     return apiClient.put(`/api/products/${id}`, formData, {
       headers: {
@@ -64,21 +65,21 @@ export const productAPI = {
 // API Service for Categories
 export const categoryAPI = {
   // Get all categories
-  getAllCategories: () => apiClient.get('/api/category'),
+  getAllCategories: () => apiClient.get('/api/categories'),
 
   // Get single category
-  getCategory: (id) => apiClient.get(`/api/category/${id}`),
+  getCategory: (id) => apiClient.get(`/api/categories/${id}`),
 
   // Create category
   createCategory: (categoryData) =>
-    apiClient.post('/api/category/create', categoryData),
+    apiClient.post('/api/categories', categoryData),
 
   // Update category
   updateCategory: (id, categoryData) =>
-    apiClient.put(`/api/category/${id}`, categoryData),
+    apiClient.put(`/api/categories/${id}`, categoryData),
 
   // Delete category
-  deleteCategory: (id) => apiClient.delete(`/api/category/${id}`),
+  deleteCategory: (id) => apiClient.delete(`/api/categories/${id}`),
 };
 
 export default apiClient;

@@ -21,6 +21,6 @@ module.exports = {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN ? JSON.parse(process.env.CORS_ORIGIN) : 'http://localhost:5173',
   },
 };
