@@ -79,6 +79,16 @@ npm start
 - `PUT /api/categories/:id` - Update category (Admin only)
 - `DELETE /api/categories/:id` - Delete category (Admin only)
 
+### Payments (M-Pesa)
+- `POST /api/payments/initiate-m2u` - Initiate M-Pesa STK push payment
+- `GET /api/payments/:id` - Get payment details
+- `GET /api/payments/:id/status` - Query payment status
+- `GET /api/payments/user/:userId` - Get user's payment history
+- `GET /api/payments` - Get all payments (Admin only)
+- `POST /api/payments/:id/cancel` - Cancel pending payment
+- `POST /api/payments/:id/refund` - Refund completed payment (Admin only)
+- `POST /api/payments/mpesa/callback` - M-Pesa webhook callback (Public)
+
 ## Product Types and Attributes
 
 ### Shoes
@@ -112,3 +122,35 @@ npm start
 - Refresh token expires in 7 days
 - Password hashing with bcrypt (10 rounds)
 - Admin role required for product/category management
+
+## Payment Integration (M-Pesa)
+
+The backend includes M-Pesa payment integration via Safaricom Daraja API for secure payments.
+
+### Quick Start
+1. Get M-Pesa sandbox credentials from [Safaricom Daraja](https://developer.safaricom.co.ke/)
+2. Add credentials to `.env` (see `.env.example` for template)
+3. See [MPESA_QUICK_START.md](./MPESA_QUICK_START.md) for API examples and cURL commands
+4. See [MPESA_INTEGRATION.md](./MPESA_INTEGRATION.md) for comprehensive documentation
+
+### Features
+- STK push payment initiation (prompts user for M-Pesa PIN)
+- Payment status querying and tracking
+- M-Pesa callback webhook handling for automatic payment updates
+- Payment history and transaction tracking
+- Admin payment management (refunds, queries)
+- Automatic database persistence of all transactions
+
+### Required Environment Variables
+```env
+MPESA_CONSUMER_KEY=your_key_from_daraja
+MPESA_CONSUMER_SECRET=your_secret_from_daraja
+MPESA_SHORT_CODE=174379
+MPESA_PASSKEY=your_passkey_from_daraja
+MPESA_CALLBACK_URL=http://localhost:8080/api/payments/mpesa/callback
+```
+
+### Testing
+- Use test phone number: `254708374149`
+- Follow examples in [MPESA_QUICK_START.md](./MPESA_QUICK_START.md)
+- For production, update to live credentials and production API URL
