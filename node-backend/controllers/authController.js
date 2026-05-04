@@ -3,13 +3,13 @@ const authService = require('../services/authService');
 class AuthController {
   async register(req, res) {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, adminCode } = req.body;
 
       if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
       }
 
-      const result = await authService.register(email, password, firstName, lastName);
+      const result = await authService.register(email, password, firstName, lastName, adminCode);
       res.status(201).json(result);
     } catch (error) {
       res.status(400).json({ message: error.message });

@@ -52,7 +52,7 @@ class PaymentController {
    */
   async initiateM2uPayment(req, res) {
     try {
-      const { phoneNumber, amount, description } = req.body;
+      const { phoneNumber, amount, description, orderId } = req.body;
       const userId = req.user.userId;
 
       if (!phoneNumber || !amount) {
@@ -78,7 +78,8 @@ class PaymentController {
         userId,
         phoneNumber,
         amount,
-        description
+        description,
+        orderId || null
       );
 
       res.status(201).json(result);

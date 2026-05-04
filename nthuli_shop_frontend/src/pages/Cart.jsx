@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { IMAGE_BASE_URL } from '../services/api';
 
 export function Cart() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const cart = useCartStore(state => state.cart);
   const removeFromCart = useCartStore(state => state.removeFromCart);
   const updateQuantity = useCartStore(state => state.updateQuantity);
@@ -69,12 +71,12 @@ export function Cart() {
                       {item.name}
                     </h3>
                     <p className="text-lg font-bold text-gray-900">
-                      KSH {(item.price * item.quantity).toFixed(2)}
+                      KSH {(parseFloat(item.price) * item.quantity).toFixed(2)}
                     </p>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-4 capitalize">
-                    {item.category} • KSH {item.price.toFixed(2)} each
+                    {item.category} • KSH {parseFloat(item.price).toFixed(2)} each
                   </p>
 
                   {/* Quantity and Remove */}
@@ -172,14 +174,33 @@ export function Cart() {
               </div>
 
               {/* Checkout Button */}
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full mb-4"
-                onClick={() => navigate('/checkout')}
-              >
-                Proceed to Checkout
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full mb-4"
+                  onClick={() => navigate('/checkout')}
+                >
+                  Proceed to Checkout
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-full mb-4"
+                    onClick={() => navigate('/login')}
+                  >
+                    Login to Checkout
+                  </Button>
+                  <p className="text-sm text-gray-600 text-center mb-4">
+                    Don't have an account? <button onClick={() => navigate('/register')} className="text-blue-600 hover:underline font-medium">Register here</button>
+                  </p>
+                  <p className="text-xs text-gray-500 text-center mb-4 italic">
+                    Your cart is saved locally until you register
+                  </p>
+                </>
+              )}
 
               <Button
                 variant="secondary"

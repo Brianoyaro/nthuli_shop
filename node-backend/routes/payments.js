@@ -19,30 +19,30 @@ router.get('/:id',
 );
 
 router.get('/:id/status',
-  // authMiddleware,
+  authMiddleware,
   paymentController.queryPaymentStatus.bind(paymentController)
 );
 
 router.post('/:id/cancel',
-  // authMiddleware,
+  authMiddleware,
   paymentController.cancelPayment.bind(paymentController)
 );
 
 router.post('/:id/refund',
-  // authMiddleware,
-  // adminMiddleware,
+  authMiddleware,
+  adminMiddleware,
   paymentController.refundPayment.bind(paymentController)
 );
 
 // Admin endpoints
 router.get('/',
-  // authMiddleware,
-  // adminMiddleware,
+  authMiddleware,
+  adminMiddleware,
   paymentController.getAllPayments.bind(paymentController)
 );
 
 router.get('/user/:userId',
-  // authMiddleware,
+  authMiddleware,
   paymentController.getUserPayments.bind(paymentController)
 );
 

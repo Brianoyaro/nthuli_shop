@@ -1,5 +1,5 @@
-const { Payment, User } = require('../models');
-const { PAYMENT_STATUS, PAYMENT_METHOD } = require('../models/enums');
+const { Payment, User, Order } = require('../models');
+const { PAYMENT_STATUS, PAYMENT_METHOD, ORDER_STATUS } = require('../models/enums');
 const mpesaService = require('./mpesaService');
 
 class PaymentService {
@@ -52,11 +52,19 @@ class PaymentService {
   /**
    * Initiate M-Pesa payment
    */
-  async initiateM2uPayment(userId, phoneNumber, amount, description) {
+  async initiateM2uPayment(userId, phoneNumber, amount, description, orderId = null) {
     try {
       // Validate user exists
       const user = await User.findByPk(userId);
       if (!user) throw new Error('User not found');
+
+      // Validate order if orderId provided
+      if (orderId) {
+        const order = await Order.findOne({
+          where: { id: orderId, userId },
+        });
+        if (!order) throw new Error('Order not found or does not belong to user');
+      }
 
       // Create payment record
       const payment = await Payment.create({
@@ -66,6 +74,7 @@ class PaymentService {
         status: PAYMENT_STATUS.PENDING,
         method: PAYMENT_METHOD.MPESA,
         description,
+        orderId: orderId || null,
       });
 
       // Initiate M-Pesa STK push
@@ -168,6 +177,15 @@ class PaymentService {
           const receiptItem = CallbackMetadata.Item.find(item => item.Name === 'MpesaReceiptNumber');
           if (receiptItem) {
             payment.transactionId = receiptItem.Value;
+          }
+        }
+
+        // Update order status to PROCESSING if orderId exists
+        if (payment.orderId) {
+          const order = await Order.findByPk(payment.orderId);
+          if (order && order.status === ORDER_STATUS.PENDING) {
+            order.status = ORDER_STATUS.PROCESSING;
+            await order.save();
           }
         }
       } else if (ResultCode === 1) {

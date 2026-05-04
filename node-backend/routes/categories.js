@@ -9,20 +9,20 @@ router.get('/:id', categoryController.getCategory.bind(categoryController));
 router.get('/:id/products', categoryController.getProductsByCategory.bind(categoryController));
 
 router.post('/', 
-  // authMiddleware, 
-  // adminMiddleware, 
+  authMiddleware, 
+  adminMiddleware, 
   categoryController.createCategory.bind(categoryController)
 );
 
 router.put('/:id', 
-  // authMiddleware, 
-  // adminMiddleware, 
+  authMiddleware, 
+  adminMiddleware, 
   categoryController.updateCategory.bind(categoryController)
 );
 
 router.delete('/:id', 
-  // authMiddleware, 
-  // adminMiddleware, 
+  authMiddleware, 
+  adminMiddleware, 
   categoryController.deleteCategory.bind(categoryController)
 );
 

@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
-const { PAYMENT_STATUS, PAYMENT_METHOD } = require('./enums');
+const { ORDER_STATUS } = require('./enums');
 
 module.exports = (sequelize) => {
-  const Payment = sequelize.define('Payment', {
+  const Order = sequelize.define('Order', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -16,36 +16,36 @@ module.exports = (sequelize) => {
         key: 'id',
       },
     },
-    amount: {
+    orderNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    totalAmount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    currency: {
-      type: DataTypes.STRING(3),
-      defaultValue: 'KES',
+    discountAmount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
     },
     status: {
-      type: DataTypes.ENUM(...Object.values(PAYMENT_STATUS)),
-      defaultValue: PAYMENT_STATUS.PENDING,
+      type: DataTypes.ENUM(...Object.values(ORDER_STATUS)),
+      defaultValue: ORDER_STATUS.PENDING,
     },
-    method: {
-      type: DataTypes.ENUM(...Object.values(PAYMENT_METHOD)),
-      allowNull: false,
-    },
-    transactionId: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: true,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    orderId: {
+    paymentId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: 'Orders',
+        model: 'Payments',
+        key: 'id',
+      },
+    },
+    couponId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Coupons',
         key: 'id',
       },
     },
@@ -57,13 +57,7 @@ module.exports = (sequelize) => {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-  }, {
-    timestamps: true,
-    indexes: [
-      { fields: ['transactionId'] },
-      { fields: ['userId'] },
-    ],
   });
 
-  return Payment;
+  return Order;
 };

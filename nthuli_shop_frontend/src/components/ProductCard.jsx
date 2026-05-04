@@ -17,10 +17,13 @@ export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
     ? `${IMAGE_BASE_URL}${primaryImage.imageUrl}`
     : 'https://via.placeholder.com/300x300?text=No+Image';
 
+  // Convert prices to numbers (API may return strings)
+  const price = parseFloat(product.price) || 0;
+  const origPrice = parseFloat(product.originalPrice) || null;
+  
   // Calculate discount (mock data - can be added to backend later)
-  const originalPrice = product.originalPrice || null;
-  const discount = originalPrice ? Math.round(((originalPrice - product.price) / originalPrice) * 100) : null;
-  const savings = originalPrice ? Math.round(originalPrice - product.price) : null;
+  const discount = origPrice ? Math.round(((origPrice - price) / origPrice) * 100) : null;
+  const savings = origPrice ? Math.round(origPrice - price) : null;
 
   if (variant === 'carousel') {
     return (
@@ -54,11 +57,11 @@ export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
             <div className="mb-3">
               <div className="flex items-baseline gap-2 mb-1">
                 <span className="text-lg font-bold text-gray-900">
-                  KSH {product.price.toFixed(2)}
+                  KSH {price.toFixed(2)}
                 </span>
-                {originalPrice && (
+                {origPrice && (
                   <span className="text-sm text-gray-500 line-through">
-                    KSH {originalPrice.toFixed(2)}
+                    KSH {origPrice.toFixed(2)}
                   </span>
                 )}
               </div>
@@ -119,11 +122,11 @@ export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
         <div className="mb-4">
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-2xl font-bold text-gray-900">
-                KSH {product.price.toFixed(2)}
+                KSH {price.toFixed(2)}
               </span>
-              {originalPrice && (
+              {origPrice && (
                 <span className="text-sm text-gray-500 line-through">
-                  KSH {originalPrice.toFixed(2)}
+                  KSH {origPrice.toFixed(2)}
               </span>
             )}
           </div>

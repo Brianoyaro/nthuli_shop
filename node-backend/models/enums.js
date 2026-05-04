@@ -85,6 +85,19 @@ const PAYMENT_METHOD = {
   STRIPE: 'STRIPE',
 };
 
+const ORDER_STATUS = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+};
+
+const DISCOUNT_TYPE = {
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED: 'FIXED',
+};
+
 // Helper to get furniture category from furniture type
 const getFurnitureCategory = (furnitureType) => {
   const homeTypes = [
@@ -114,5 +127,7 @@ module.exports = {
   ROLE,
   PAYMENT_STATUS,
   PAYMENT_METHOD,
+  ORDER_STATUS,
+  DISCOUNT_TYPE,
   getFurnitureCategory,
 };

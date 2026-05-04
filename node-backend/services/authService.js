@@ -1,11 +1,24 @@
 const { User } = require('../models');
+const { ROLE } = require('../models/enums');
 const jwtService = require('./jwtService');
 
+// Admin registration code - change this to a secure value in production
+const ADMIN_REGISTRATION_CODE = process.env.ADMIN_CODE || 'AdminCode@2024';
+
 class AuthService {
-  async register(email, password, firstName, lastName) {
+  async register(email, password, firstName, lastName, adminCode = null) {
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       throw new Error('User with this email already exists');
+    }
+
+    // Determine user role based on admin code
+    let userRole = ROLE.USER;
+    if (adminCode) {
+      if (adminCode !== ADMIN_REGISTRATION_CODE) {
+        throw new Error('Invalid admin code');
+      }
+      userRole = ROLE.ADMIN;
     }
 
     const user = await User.create({
@@ -13,6 +26,7 @@ class AuthService {
       password,
       firstName,
       lastName,
+      role: userRole,
     });
 
     const tokens = jwtService.generateTokens(user.id, user.email, user.role);

@@ -1,15 +1,15 @@
 {
   "development": {
-    "username": "root",
-    "password": "root",
+    "username": "brian",
+    "password": "password",
     "database": "nthuli_shop",
     "host": "127.0.0.1",
     "port": 3306,
     "dialect": "mysql"
   },
   "test": {
-    "username": "root",
-    "password": "root",
+    "username": "brian",
+    "password": "password",
     "database": "nthuli_shop_test",
     "host": "127.0.0.1",
     "port": 3306,

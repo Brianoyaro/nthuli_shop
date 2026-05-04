@@ -145,7 +145,7 @@ export function ProductDetail() {
             <div className="border-b pb-6">
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-5xl font-bold text-gray-900">
-                  KSH {product.price.toFixed(2)}
+                  KSH {parseFloat(product.price).toFixed(2)}
                 </span>
               </div>
               <p className="text-gray-600">Free shipping on orders over KSH 50</p>

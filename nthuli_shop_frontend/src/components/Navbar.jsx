@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { FaShoppingCart, FaBars, FaTimes, FaSearch, FaBox } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes, FaSearch, FaBox, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
+import { useAuth } from '../context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { productsAPI } from '../services/api';
 
@@ -12,6 +13,7 @@ export function Navbar() {
   const searchRef = useRef(null);
   const navigate = useNavigate();
   
+  const { isAuthenticated, user, logout } = useAuth();
   const cartCount = useCartStore(state => state.getCartItemCount());
   const location = useLocation();
 
@@ -130,8 +132,8 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* Right Section - Search, Cart & Menu Button */}
-          <div className="flex items-center gap-3 md:gap-4">
+          {/* Right Section - Search, Cart, Auth & Menu Button */}
+          <div className="flex items-center gap-2 md:gap-3">
             {/* Cart Icon with Badge */}
             <Link
               to="/cart"
@@ -144,6 +146,43 @@ export function Navbar() {
                 </span>
               )}
             </Link>
+
+            {/* Auth Section - Desktop */}
+            <div className="hidden md:flex items-center gap-2">
+              {isAuthenticated ? (
+                <>
+                  <div className="flex items-center gap-2 px-3 py-2 text-gray-600">
+                    <FaUser className="w-4 h-4" />
+                    <span className="text-sm font-medium truncate max-w-xs">{user?.email}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    <FaSignOutAlt className="w-4 h-4" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -260,6 +299,46 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+
+            {/* Mobile Auth Section */}
+            <div className="border-t border-gray-200 pt-4 mt-4 space-y-2">
+              {isAuthenticated ? (
+                <>
+                  <div className="px-4 py-2.5 text-gray-600 flex items-center gap-2">
+                    <FaUser className="w-4 h-4" />
+                    <span className="text-sm font-medium truncate">{user?.email}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                      handleLinkClick();
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    <FaSignOutAlt className="w-4 h-4" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={handleLinkClick}
+                    className="block px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 font-medium text-sm"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={handleLinkClick}
+                    className="block px-4 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all duration-200 font-medium text-sm text-center"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

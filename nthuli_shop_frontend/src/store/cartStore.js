@@ -5,6 +5,7 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       cart: [],
+      isSynced: false, // Track if cart is from database
 
       addToCart: (product) => {
         const { cart } = get();
@@ -58,8 +59,19 @@ export const useCartStore = create(
         set({ cart: [] });
       },
 
+      /**
+       * Set cart from database (after sync/login)
+       * Replaces local cart with database cart
+       */
+      setSyncedCart: (dbCart) => {
+        set({
+          cart: dbCart,
+          isSynced: true,
+        });
+      },
+
       getCartTotal: () => {
-        return get().cart.reduce((total, item) => total + item.price * item.quantity, 0);
+        return get().cart.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0);
       },
 
       getCartItemCount: () => {

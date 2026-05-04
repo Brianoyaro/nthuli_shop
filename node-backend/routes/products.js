@@ -9,22 +9,22 @@ router.get('/', productController.getAllProducts.bind(productController));
 router.get('/:id', productController.getProduct.bind(productController));
 
 router.post('/', 
-  // authMiddleware, 
-  // adminMiddleware, 
+  authMiddleware, 
+  adminMiddleware, 
   upload.array('images', 10),
   productController.createProduct.bind(productController)
 );
 
 router.put('/:id', 
-  // authMiddleware, 
-  // adminMiddleware, 
+  authMiddleware, 
+  adminMiddleware, 
   upload.array('images', 10),
   productController.updateProduct.bind(productController)
 );
 
 router.delete('/:id', 
-  // authMiddleware, 
-  // adminMiddleware, 
+  authMiddleware, 
+  adminMiddleware, 
   productController.deleteProduct.bind(productController)
 );
 
