@@ -5,6 +5,7 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       cart: [],
+      isSyncedWithBackend: false,
 
       addToCart: (product) => {
         const { cart } = get();
@@ -64,6 +65,46 @@ export const useCartStore = create(
 
       getCartItemCount: () => {
         return get().cart.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      /**
+       * Sync cart from backend (authenticated users)
+       * Replaces local cart with backend cart items
+       */
+      syncFromBackend: (backendItems) => {
+        console.log('🔄 Syncing cart from backend:', backendItems);
+        const transformedItems = backendItems.map(item => ({
+          id: item.productId,
+          name: item.productName,
+          price: parseFloat(item.unitPrice),
+          quantity: item.quantity,
+          // These fields may not be in backend response
+          image: 'https://via.placeholder.com/300x300?text=Product',
+          category: 'General',
+        }));
+
+        set({
+          cart: transformedItems,
+          isSyncedWithBackend: true,
+        });
+
+        console.log('✅ Cart synced from backend');
+      },
+
+      /**
+       * Mark cart as synced with backend
+       */
+      setSyncedWithBackend: (synced) => {
+        set({ isSyncedWithBackend: synced });
+        console.log(`🔀 Backend sync flag set to: ${synced}`);
+      },
+
+      /**
+       * Reset cart to unsynced state (e.g., on logout)
+       */
+      resetSyncState: () => {
+        set({ isSyncedWithBackend: false });
+        console.log('🔄 Cart sync state reset');
       },
     }),
     {

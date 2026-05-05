@@ -1,19 +1,23 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { FaShoppingCart, FaBars, FaTimes, FaSearch, FaBox } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes, FaSearch, FaBox, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { useCartStore } from '../store/cartStore';
+import { useAuth } from '../hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { productsAPI } from '../services/api';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchRef = useRef(null);
+  const authMenuRef = useRef(null);
   const navigate = useNavigate();
   
   const cartCount = useCartStore(state => state.getCartItemCount());
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Fetch all products
   const { data: productsData } = useQuery({
@@ -80,6 +84,24 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close auth menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (authMenuRef.current && !authMenuRef.current.contains(event.target)) {
+        setIsAuthMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsAuthMenuOpen(false);
+    navigate('/');
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -144,6 +166,71 @@ export function Navbar() {
                 </span>
               )}
             </Link>
+
+            {/* Authentication Section */}
+            <div className="hidden md:flex items-center gap-2 border-l border-gray-200 pl-3 md:pl-4">
+              {isAuthenticated ? (
+                <div ref={authMenuRef} className="relative">
+                  <button
+                    onClick={() => setIsAuthMenuOpen(!isAuthMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 rounded-lg transition-all duration-200 hover:bg-blue-50"
+                  >
+                    <FaUser className="w-4 h-4" />
+                    <span className="text-sm font-medium truncate max-w-[150px]">
+                      {user?.email?.split('@')[0] || 'Account'}
+                    </span>
+                  </button>
+
+                  {/* Auth Dropdown Menu */}
+                  {isAuthMenuOpen && (
+                    <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-48">
+                      <div className="px-4 py-3 border-b border-gray-200">
+                        <p className="text-sm font-medium text-gray-900 truncate">{user?.email}</p>
+                        <p className="text-xs text-gray-500">Authenticated</p>
+                      </div>
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsAuthMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <FaUser className="inline w-4 h-4 mr-2" />
+                        My Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        onClick={() => setIsAuthMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <FaBox className="inline w-4 h-4 mr-2" />
+                        My Orders
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-200"
+                      >
+                        <FaSignOutAlt className="inline w-4 h-4 mr-2" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/login"
+                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Menu Button */}
             <button
