@@ -2,6 +2,7 @@ package org.nthuli_shop.nthuli_shop.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushRequest;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushResponse;
 import org.nthuli_shop.nthuli_shop.payment.dto.PaymentResponseDto;
@@ -23,12 +24,12 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     /**
-     * Initiate M-Pesa STK Push payment
+     * Initiate M-Pesa STK Push payment for authenticated user
      */
-    public MpesaStkPushResponse initiateMpesaPayment(MpesaStkPushRequest request) {
-        log.info("Initiating M-Pesa payment for order: {} with email: {} and amount: {}", 
-                request.getOrderId(), request.getEmail(), request.getAmount());
-        return mpesaService.initiateStkPush(request);
+    public MpesaStkPushResponse initiateMpesaPayment(User user, MpesaStkPushRequest request) {
+        log.info("Initiating M-Pesa payment for user: {} order: {} with amount: {}", 
+                user.getId(), request.getOrderId(), request.getAmount());
+        return mpesaService.initiateStkPush(user, request);
     }
 
     /**
@@ -50,8 +51,8 @@ public class PaymentService {
     /**
      * Get all user payments
      */
-    public List<PaymentResponseDto> getUserPayments(Long userId) {
-        return mpesaService.getUserPayments(userId)
+    public List<PaymentResponseDto> getUserPayments(User user) {
+        return paymentRepository.findByUser(user)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -60,28 +61,8 @@ public class PaymentService {
     /**
      * Get completed user payments
      */
-    public List<PaymentResponseDto> getUserCompletedPayments(Long userId) {
-        return mpesaService.getUserCompletedPayments(userId)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get all payments by email
-     */
-    public List<PaymentResponseDto> getPaymentsByEmail(String email) {
-        return paymentRepository.findByEmail(email)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get completed payments by email
-     */
-    public List<PaymentResponseDto> getCompletedPaymentsByEmail(String email) {
-        return paymentRepository.findByEmailAndPaymentStatus(email, org.nthuli_shop.nthuli_shop.payment.enums.PaymentStatus.COMPLETED)
+    public List<PaymentResponseDto> getUserCompletedPayments(User user) {
+        return paymentRepository.findByUserAndPaymentStatus(user, PaymentStatus.COMPLETED)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -95,14 +76,13 @@ public class PaymentService {
         
         return PaymentResponseDto.builder()
                 .id(payment.getId())
-                .orderId(payment.getOrderId())
-                .userId(payment.getUserId())
-                .email(payment.getEmail())
+                .orderId(payment.getOrder() != null ? payment.getOrder().getId() : null)
+                .userId(payment.getUser() != null ? payment.getUser().getId() : null)
+                .email(payment.getUser() != null ? payment.getUser().getEmail() : null)
                 .amount(payment.getAmount())
                 .paymentMethod(payment.getPaymentMethod().toString())
                 .paymentStatus(payment.getPaymentStatus().toString())
                 .transactionId(payment.getTransactionId())
-                .phoneNumber(payment.getPhoneNumber())
                 .description(payment.getDescription())
                 .createdAt(payment.getCreatedAt() != null ? 
                         payment.getCreatedAt().format(formatter) : null)

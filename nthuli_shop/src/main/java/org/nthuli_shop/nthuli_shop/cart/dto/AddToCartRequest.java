@@ -1,4 +1,4 @@
-package org.nthuli_shop.nthuli_shop.payment.dto;
+package org.nthuli_shop.nthuli_shop.cart.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,13 +11,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MpesaStkPushRequest {
+public class AddToCartRequest {
     
-    private Long orderId;
+    private Long productId;
     
-    private String phoneNumber;
+    private String productName;
     
-    private BigDecimal amount;
+    private BigDecimal unitPrice;
     
-    private String description;
+    private Integer quantity;
 }

@@ -1,5 +1,7 @@
 package org.nthuli_shop.nthuli_shop.payment.repository;
 
+import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
+import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.nthuli_shop.nthuli_shop.payment.entity.Payment;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,12 +12,18 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
+    
     Optional<Payment> findByTransactionId(String transactionId);
+    
     Optional<Payment> findByMpesaReference(String mpesaReference);
-    List<Payment> findByOrderId(Long orderId);
+    
+    Optional<Payment> findByOrder(Order order);
+    
+    List<Payment> findByUser(User user);
+    
+    List<Payment> findByUserAndPaymentStatus(User user, PaymentStatus paymentStatus);
+    
     List<Payment> findByUserId(Long userId);
+    
     List<Payment> findByUserIdAndPaymentStatus(Long userId, PaymentStatus paymentStatus);
-    List<Payment> findByEmail(String email);
-    List<Payment> findByEmailAndPhoneNumber(String email, String phoneNumber);
-    List<Payment> findByEmailAndPaymentStatus(String email, PaymentStatus paymentStatus);
 }

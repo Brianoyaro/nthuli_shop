@@ -50,15 +50,45 @@ public class SecurityConfig {
 
                 // Authorise endpoints
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        // these endpoints are exempted from authentication
+                        // PUBLIC endpoints - no authentication required
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/health",
+                                "/api/auth/refresh-token",
                                 "/uploads/**",
-                                "/api/category/**", "/api/products/**", "/api/cart/**", "/api/orders/**" // for testing!!!!!!!!!!!
+                                "/api/category",          // GET all categories
+                                "/api/category/{id}",     // GET category by ID
+                                "/api/category/*/products", // GET products by category
+                                "/api/products",          // GET all products
+                                "/api/products/**",       // GET specific product (READ-ONLY)
+                                "/api/payments/mpesa/callback" // M-Pesa webhook callback
                         ).permitAll()
-                        // these endpoints require a user to have ADMIN role
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // all other endpoints require authentication
+                        
+                        // AUTHENTICATED USER endpoints (excluding admin methods)
+                        .requestMatchers(
+                                "/api/cart/**",
+                                "/api/user/profile",
+                                "/api/payments/mpesa/stk-push",
+                                "/api/payments/user/**",
+                                "/api/orders/from-cart",
+                                "/api/orders/user/**",
+                                "/api/orders/*/cancel",
+                                "/api/payments/*"
+                        ).authenticated()
+                        
+                        // ADMIN ONLY endpoints
+                        .requestMatchers(
+                                "/api/admin/**",
+                                "/api/category/create",
+                                "/api/category/*",        // PUT & DELETE for update/delete
+                                "/api/products/create",
+                                "/api/products/*",        // PUT & DELETE for update/delete
+                                "/api/orders/admin/**",
+                                "/api/orders/*/status/**"
+                        ).hasRole("ADMIN")
+                        
+                        // All other endpoints require authentication
                         .anyRequest().authenticated())
 
                 // set authentication provider

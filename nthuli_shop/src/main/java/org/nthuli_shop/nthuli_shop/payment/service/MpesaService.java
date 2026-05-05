@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.payment.config.MpesaConfig;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaCallbackResponse;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushRequest;
@@ -13,7 +14,10 @@ import org.nthuli_shop.nthuli_shop.payment.enums.PaymentMethod;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentStatus;
 import org.nthuli_shop.nthuli_shop.payment.repository.PaymentRepository;
 import org.nthuli_shop.nthuli_shop.payment.util.MpesaUtil;
+import org.nthuli_shop.nthuli_shop.order.repository.OrderRepository;
+import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.springframework.http.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +34,7 @@ public class MpesaService {
 
     private final MpesaConfig mpesaConfig;
     private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -68,8 +73,12 @@ public class MpesaService {
     /**
      * Initiate STK Push request for M-Pesa payment
      */
-    public MpesaStkPushResponse initiateStkPush(MpesaStkPushRequest request) {
+    public MpesaStkPushResponse initiateStkPush(User user, MpesaStkPushRequest request) {
         try {
+            // Fetch order
+            Order order = orderRepository.findById(request.getOrderId())
+                    .orElseThrow(() -> new RuntimeException("Order not found with id: " + request.getOrderId()));
+            
             // Sanitize phone number
             String phoneNumber = MpesaUtil.sanitizePhoneNumber(request.getPhoneNumber());
             
@@ -92,7 +101,7 @@ public class MpesaService {
             requestBody.put("PartyB", mpesaConfig.getPartyB());
             requestBody.put("PhoneNumber", phoneNumber);
             requestBody.put("CallBackURL", mpesaConfig.getCallbackUrl());
-            requestBody.put("AccountReference", "ORDER-" + request.getOrderId());
+            requestBody.put("AccountReference", "ORDER-" + order.getId());
             requestBody.put("TransactionDesc", request.getDescription() != null ? 
                     request.getDescription() : "Payment for order");
 
@@ -123,14 +132,13 @@ public class MpesaService {
                 String responseDescription = body.get("ResponseDescription").asText();
                 String customerMessage = body.get("CustomerMessage").asText();
 
-                // Save payment record
+                // Save payment record with authenticated user
                 Payment payment = Payment.builder()
-                        .orderId(request.getOrderId())
-                        .email(request.getEmail())
+                        .user(user)
+                        .order(order)
                         .amount(request.getAmount())
                         .paymentMethod(PaymentMethod.MPESA_STK_PUSH)
                         .paymentStatus(PaymentStatus.PENDING)
-                        .phoneNumber(phoneNumber)
                         .transactionId(checkoutRequestId)
                         .mpesaReference(merchantRequestId)
                         .description(request.getDescription())
@@ -138,7 +146,7 @@ public class MpesaService {
                 
                 paymentRepository.save(payment);
 
-                log.info("STK Push initiated successfully for order: {}", request.getOrderId());
+                log.info("STK Push initiated successfully for user: {} order: {}", user.getId(), order.getId());
 
                 return MpesaStkPushResponse.builder()
                         .merchantRequestId(merchantRequestId)
@@ -210,7 +218,7 @@ public class MpesaService {
                     }
                 }
                 
-                log.info("Payment successful for order: {}", payment.getOrderId());
+                log.info("Payment successful for order: {}", payment.getOrder().getId());
             } else {
                 // Payment failed
                 payment.setPaymentStatus(PaymentStatus.FAILED);
@@ -236,11 +244,10 @@ public class MpesaService {
      * Get payment by order ID
      */
     public Payment getPaymentByOrderId(Long orderId) {
-        List<Payment> payments = paymentRepository.findByOrderId(orderId);
-        if (payments.isEmpty()) {
-            throw new RuntimeException("Payment not found for order: " + orderId);
-        }
-        return payments.get(0);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+        return paymentRepository.findByOrder(order)
+                .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
     }
 
     /**

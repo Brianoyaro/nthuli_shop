@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentMethod;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentStatus;
+import org.nthuli_shop.nthuli_shop.order.entity.Order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,14 +25,14 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "user_id")
-    private Long userId;
-
-    @Column(name = "email")
-    private String email;
+    // One-to-One mapping with Order
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
+    private Order order;
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
@@ -45,9 +47,6 @@ public class Payment {
 
     @Column(name = "transaction_id")
     private String transactionId;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
 
     @Column(name = "mpesa_reference")
     private String mpesaReference;

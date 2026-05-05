@@ -2,6 +2,7 @@ package org.nthuli_shop.nthuli_shop.payment.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushRequest;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushResponse;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaCallbackResponse;
@@ -10,7 +11,7 @@ import org.nthuli_shop.nthuli_shop.payment.service.MpesaService;
 import org.nthuli_shop.nthuli_shop.payment.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -29,18 +30,13 @@ public class PaymentController {
     /**
      * Initiate M-Pesa STK Push payment
      * POST /api/payments/mpesa/stk-push
-     * Authentication: NOT REQUIRED (unauthenticated users can make payments)
+     * Authentication: REQUIRED
      */
     @PostMapping("/mpesa/stk-push")
     public ResponseEntity<?> initiateMpesaStkPush(
+            @AuthenticationPrincipal User user,
             @RequestBody MpesaStkPushRequest request) {
         try {
-            // Validate email
-            if (request.getEmail() == null || request.getEmail().isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(createErrorResponse("Email is required"));
-            }
-
             // Validate phone number
             if (request.getPhoneNumber() == null || request.getPhoneNumber().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -59,7 +55,7 @@ public class PaymentController {
                         .body(createErrorResponse("Order ID is required"));
             }
 
-            MpesaStkPushResponse response = paymentService.initiateMpesaPayment(request);
+            MpesaStkPushResponse response = paymentService.initiateMpesaPayment(user, request);
             
             return ResponseEntity.ok()
                     .body(createSuccessResponse("STK Push initiated successfully", response));
@@ -93,11 +89,14 @@ public class PaymentController {
     }
 
     /**
-     * Get payment by payment ID
+     * Get authenticated user's payment by payment ID
      * GET /api/payments/{paymentId}
+     * Authentication: REQUIRED
      */
     @GetMapping("/{paymentId}")
-    public ResponseEntity<?> getPayment(@PathVariable Long paymentId) {
+    public ResponseEntity<?> getPayment(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long paymentId) {
         try {
             PaymentResponseDto payment = paymentService.getPaymentById(paymentId);
             return ResponseEntity.ok(createSuccessResponse("Payment retrieved successfully", payment));
@@ -127,17 +126,17 @@ public class PaymentController {
     /**
      * Get all payments for authenticated user
      * GET /api/payments/user/all
+     * Authentication: REQUIRED
      */
     @GetMapping("/user/all")
-    public ResponseEntity<?> getUserPayments(Authentication authentication) {
+    public ResponseEntity<?> getUserPayments(@AuthenticationPrincipal User user) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()) {
+            if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(createErrorResponse("User not authenticated"));
             }
 
-            Long userId = extractUserIdFromAuth(authentication);
-            List<PaymentResponseDto> payments = paymentService.getUserPayments(userId);
+            List<PaymentResponseDto> payments = paymentService.getUserPayments(user);
             
             return ResponseEntity.ok(createSuccessResponse("User payments retrieved successfully", payments));
 
@@ -151,17 +150,17 @@ public class PaymentController {
     /**
      * Get completed payments for authenticated user
      * GET /api/payments/user/completed
+     * Authentication: REQUIRED
      */
     @GetMapping("/user/completed")
-    public ResponseEntity<?> getUserCompletedPayments(Authentication authentication) {
+    public ResponseEntity<?> getUserCompletedPayments(@AuthenticationPrincipal User user) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()) {
+            if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(createErrorResponse("User not authenticated"));
             }
 
-            Long userId = extractUserIdFromAuth(authentication);
-            List<PaymentResponseDto> payments = paymentService.getUserCompletedPayments(userId);
+            List<PaymentResponseDto> payments = paymentService.getUserCompletedPayments(user);
             
             return ResponseEntity.ok(createSuccessResponse("Completed payments retrieved successfully", payments));
 
@@ -170,66 +169,6 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to retrieve completed payments"));
         }
-    }
-
-    /**
-     * Get all payments by email (for unauthenticated users)
-     * GET /api/payments/email/{email}
-     */
-    @GetMapping("/email/{email}")
-    public ResponseEntity<?> getPaymentsByEmail(@PathVariable String email) {
-        try {
-            if (email == null || email.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(createErrorResponse("Email is required"));
-            }
-
-            List<PaymentResponseDto> payments = paymentService.getPaymentsByEmail(email);
-            
-            return ResponseEntity.ok(createSuccessResponse("Payments retrieved successfully", payments));
-
-        } catch (Exception e) {
-            log.error("Error retrieving payments by email", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("Failed to retrieve payments"));
-        }
-    }
-
-    /**
-     * Get completed payments by email (for unauthenticated users)
-     * GET /api/payments/email/{email}/completed
-     */
-    @GetMapping("/email/{email}/completed")
-    public ResponseEntity<?> getCompletedPaymentsByEmail(@PathVariable String email) {
-        try {
-            if (email == null || email.isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(createErrorResponse("Email is required"));
-            }
-
-            List<PaymentResponseDto> payments = paymentService.getCompletedPaymentsByEmail(email);
-            
-            return ResponseEntity.ok(createSuccessResponse("Completed payments retrieved successfully", payments));
-
-        } catch (Exception e) {
-            log.error("Error retrieving completed payments by email", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("Failed to retrieve completed payments"));
-        }
-    }
-
-    // Helper methods
-
-    private Long extractUserIdFromAuth(Authentication authentication) {
-        // Extract user ID from authentication principal
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof org.nthuli_shop.nthuli_shop.Authentication.entity.User) {
-            org.nthuli_shop.nthuli_shop.Authentication.entity.User user = 
-                    (org.nthuli_shop.nthuli_shop.Authentication.entity.User) principal;
-            return user.getId();
-        }
-        // Fallback - return 1L if unable to extract
-        return 1L;
     }
 
     private Map<String, Object> createSuccessResponse(String message, Object data) {
