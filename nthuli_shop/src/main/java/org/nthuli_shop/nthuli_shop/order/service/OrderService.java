@@ -11,6 +11,7 @@ import org.nthuli_shop.nthuli_shop.order.entity.OrderItem;
 import org.nthuli_shop.nthuli_shop.order.enums.OrderStatus;
 import org.nthuli_shop.nthuli_shop.order.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +29,7 @@ public class OrderService {
     /**
      * Create order from authenticated user's cart items
      */
+    @Transactional
     public OrderResponseDto createOrderFromCart(User user, String shippingAddress, String notes, String description) {
         log.info("Creating order from cart for user: {}", user.getId());
         
