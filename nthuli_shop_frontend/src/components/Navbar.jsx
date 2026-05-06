@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { FaShoppingCart, FaBars, FaTimes, FaSearch, FaBox, FaUser, FaSignOutAlt } from 'react-icons/fa';
-import { useCartStore } from '../store/cartStore';
+import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { productsAPI } from '../services/api';
@@ -15,7 +15,8 @@ export function Navbar() {
   const authMenuRef = useRef(null);
   const navigate = useNavigate();
   
-  const cartCount = useCartStore(state => state.getCartItemCount());
+  const { getCartItemCount } = useCart();
+  const cartCount = getCartItemCount();
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
 

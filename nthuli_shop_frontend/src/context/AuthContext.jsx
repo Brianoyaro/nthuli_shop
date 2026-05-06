@@ -1,11 +1,9 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import { authAPI } from '../services/authAPI';
-import { cartAPI } from '../services/cartAPI';
-import { useCartStore } from '../store/cartStore';
 
 /**
  * AuthContext
- * Manages user authentication, JWT tokens, and cart sync on login/logout
+ * Manages user authentication, JWT tokens
  */
 export const AuthContext = createContext();
 
@@ -16,8 +14,6 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tokenRefreshScheduled, setTokenRefreshScheduled] = useState(false);
-
-  const { syncFromBackend, setSyncedWithBackend, clearCart } = useCartStore();
 
   /**
    * Load tokens from localStorage on mount
@@ -60,9 +56,6 @@ export function AuthProvider({ children }) {
       setRefreshToken(loginResponse.refreshToken);
       setUser({ email });
 
-      // Sync cart to backend
-      await syncCartToBackend();
-
       return { success: true, data: loginResponse };
     } catch (err) {
       const errorMessage = err.message || 'Signup failed';
@@ -94,9 +87,6 @@ export function AuthProvider({ children }) {
       setRefreshToken(response.refreshToken);
       setUser({ email });
 
-      // Sync cart to backend
-      await syncCartToBackend();
-
       return { success: true, data: response };
     } catch (err) {
       const errorMessage = err.message || 'Login failed';
@@ -107,58 +97,6 @@ export function AuthProvider({ children }) {
       setIsLoading(false);
     }
   }, []);
-
-  /**
-   * Sync local cart to backend after authentication
-   */
-  const syncCartToBackend = useCallback(async () => {
-    try {
-      console.log('🔄 Syncing cart to backend...');
-
-      // Get local cart items from Zustand store
-      const localCart = useCartStore.getState().cart;
-
-      if (localCart && localCart.length > 0) {
-        // Get backend cart
-        const backendCart = await cartAPI.getCart();
-        console.log('📦 Backend cart retrieved:', backendCart);
-
-        // Merge: backend items take precedence, then add local items not in backend
-        const mergedItems = [...(backendCart.items || [])];
-        const backendProductIds = mergedItems.map(item => item.productId);
-
-        for (const localItem of localCart) {
-          if (!backendProductIds.includes(localItem.id)) {
-            // Add local item to backend if not already there
-            try {
-              await cartAPI.addToCart(
-                localItem.id,
-                localItem.name,
-                parseFloat(localItem.price),
-                localItem.quantity
-              );
-              console.log(`✅ Added local item to backend: ${localItem.name}`);
-            } catch (addErr) {
-              console.warn(`⚠️ Failed to add item ${localItem.name} to backend:`, addErr);
-            }
-          }
-        }
-      }
-
-      // Get final cart from backend
-      const finalCart = await cartAPI.getCart();
-      console.log('📦 Final synced cart:', finalCart);
-
-      // Update Zustand store with backend cart
-      syncFromBackend(finalCart.items || []);
-      setSyncedWithBackend(true);
-
-      console.log('✅ Cart sync complete');
-    } catch (err) {
-      console.warn('⚠️ Cart sync failed:', err);
-      // Don't fail auth if cart sync fails - user still logged in
-    }
-  }, [syncFromBackend, setSyncedWithBackend]);
 
   /**
    * Refresh access token
@@ -236,7 +174,6 @@ export function AuthProvider({ children }) {
       setRefreshToken(null);
       setUser(null);
       setError(null);
-      setSyncedWithBackend(false);
 
       console.log('✅ Logout complete');
       return { success: true };
@@ -244,7 +181,7 @@ export function AuthProvider({ children }) {
       console.error('❌ Logout error:', err);
       return { success: false, error: err.message };
     }
-  }, [setSyncedWithBackend]);
+  }, []);
 
   /**
    * Check if user is authenticated

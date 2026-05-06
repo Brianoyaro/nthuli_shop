@@ -1,65 +1,291 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useEffect, useContext } from 'react';
+import { cartAPI } from '../services/cartAPI';
+import { AuthContext } from './AuthContext';
 
 export const CartContext = createContext();
 
+const STORAGE_KEY = 'nthuli_cart';
+
+/**
+ * Transforms backend cart format to UI format
+ */
+const transformBackendItem = (item) => ({
+  id: item.productId,
+  name: item.productName,
+  price: parseFloat(item.unitPrice),
+  quantity: item.quantity,
+  image: 'https://via.placeholder.com/300x300?text=Product',
+  category: 'General',
+});
+
 export function CartProvider({ children }) {
+  const { isAuthenticated, isLoading: authLoading } = useContext(AuthContext);
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  const addToCart = useCallback((product) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
-      
-      if (existingItem) {
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+  /**
+   * Initialize cart: Load from localStorage or fetch from backend
+   */
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to load
+
+    const initializeCart = async () => {
+      try {
+        setLoading(true);
+
+        if (isAuthenticated) {
+          // Authenticated: Fetch from backend
+          console.log('👤 Authenticated user - fetching cart from backend');
+          const response = await cartAPI.getCart();
+          const backendCart = (response.items || []).map(transformBackendItem);
+          setCart(backendCart);
+        } else {
+          // Guest: Load from localStorage
+          console.log('👥 Guest user - loading cart from localStorage');
+          const storedCart = localStorage.getItem(STORAGE_KEY);
+          setCart(storedCart ? JSON.parse(storedCart) : []);
+        }
+      } catch (error) {
+        console.error('❌ Failed to initialize cart:', error);
+        setCart([]);
+      } finally {
+        setLoading(false);
+        setHasInitialized(true);
       }
-      
-      return [...prevCart, { ...product, quantity: 1 }];
-    });
+    };
+
+    initializeCart();
+  }, [isAuthenticated, authLoading]);
+
+  /**
+   * Save cart to localStorage (for guests)
+   */
+  const saveToLocalStorage = useCallback((cartData) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cartData));
   }, []);
 
-  const removeFromCart = useCallback((productId) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId));
-  }, []);
+  /**
+   * Add product to cart
+   */
+  const addToCart = useCallback(
+    async (product) => {
+      try {
+        setLoading(true);
+        console.log('➕ Adding to cart:', product.name);
 
-  const updateQuantity = useCallback((productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
+        if (isAuthenticated) {
+          // Call backend
+          await cartAPI.addToCart(
+            product.id,
+            product.name,
+            product.price,
+            1
+          );
+          // Refetch cart from backend
+          const response = await cartAPI.getCart();
+          const backendCart = (response.items || []).map(transformBackendItem);
+          setCart(backendCart);
+        } else {
+          // Update localStorage
+          const existingItem = cart.find((item) => item.id === product.id);
+          let updatedCart;
+
+          if (existingItem) {
+            updatedCart = cart.map((item) =>
+              item.id === product.id
+                ? { ...item, quantity: item.quantity + 1 }
+                : item
+            );
+          } else {
+            updatedCart = [
+              ...cart,
+              {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images?.[0]?.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
+                category: product.categoryName || 'General',
+                quantity: 1,
+              },
+            ];
+          }
+
+          setCart(updatedCart);
+          saveToLocalStorage(updatedCart);
+        }
+
+        console.log('✅ Item added to cart');
+      } catch (error) {
+        console.error('❌ Error adding to cart:', error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [cart, isAuthenticated, saveToLocalStorage]
+  );
+
+  /**
+   * Remove product from cart
+   */
+  const removeFromCart = useCallback(
+    async (productId) => {
+      try {
+        setLoading(true);
+        console.log('🗑️ Removing from cart:', productId);
+
+        if (isAuthenticated) {
+          // Call backend
+          await cartAPI.removeFromCart(productId);
+          // Refetch cart from backend
+          const response = await cartAPI.getCart();
+          const backendCart = (response.items || []).map(transformBackendItem);
+          setCart(backendCart);
+        } else {
+          // Update localStorage
+          const updatedCart = cart.filter((item) => item.id !== productId);
+          setCart(updatedCart);
+          saveToLocalStorage(updatedCart);
+        }
+
+        console.log('✅ Item removed from cart');
+      } catch (error) {
+        console.error('❌ Error removing from cart:', error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [cart, isAuthenticated, saveToLocalStorage]
+  );
+
+  /**
+   * Update product quantity in cart
+   */
+  const updateQuantity = useCallback(
+    async (productId, quantity) => {
+      try {
+        if (quantity <= 0) {
+          await removeFromCart(productId);
+          return;
+        }
+
+        setLoading(true);
+        console.log('✏️ Updating quantity:', { productId, quantity });
+
+        if (isAuthenticated) {
+          // Call backend
+          await cartAPI.updateQuantity(productId, quantity);
+          // Refetch cart from backend
+          const response = await cartAPI.getCart();
+          const backendCart = (response.items || []).map(transformBackendItem);
+          setCart(backendCart);
+        } else {
+          // Update localStorage
+          const updatedCart = cart.map((item) =>
+            item.id === productId ? { ...item, quantity } : item
+          );
+          setCart(updatedCart);
+          saveToLocalStorage(updatedCart);
+        }
+
+        console.log('✅ Quantity updated');
+      } catch (error) {
+        console.error('❌ Error updating quantity:', error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [cart, isAuthenticated, removeFromCart, saveToLocalStorage]
+  );
+
+  /**
+   * Clear entire cart
+   */
+  const clearCart = useCallback(async () => {
+    try {
+      setLoading(true);
+      console.log('🧹 Clearing cart');
+
+      if (isAuthenticated) {
+        // Remove all items from backend
+        for (const item of cart) {
+          try {
+            await cartAPI.removeFromCart(item.id);
+          } catch (err) {
+            console.warn(`⚠️ Failed to remove item ${item.id} from backend:`, err);
+          }
+        }
+      }
+
+      setCart([]);
+      saveToLocalStorage([]);
+      console.log('✅ Cart cleared');
+    } catch (error) {
+      console.error('❌ Error clearing cart:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
-    
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === productId
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  }, [removeFromCart]);
+  }, [cart, isAuthenticated, saveToLocalStorage]);
 
-  const clearCart = useCallback(() => {
-    setCart([]);
-  }, []);
-
+  /**
+   * Get cart total
+   */
   const getCartTotal = useCallback(() => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [cart]);
 
+  /**
+   * Get total item count
+   */
   const getCartItemCount = useCallback(() => {
     return cart.reduce((count, item) => count + item.quantity, 0);
   }, [cart]);
 
+  /**
+   * Sync guest cart to backend after login
+   */
+  const syncGuestCartToBackend = useCallback(async () => {
+    if (!isAuthenticated || cart.length === 0) return;
+
+    try {
+      console.log('🔄 Syncing guest cart to backend...');
+
+      // Add all guest items to backend
+      for (const item of cart) {
+        try {
+          await cartAPI.addToCart(item.id, item.name, item.price, item.quantity);
+        } catch (err) {
+          console.warn(`⚠️ Failed to sync item ${item.name}:`, err);
+        }
+      }
+
+      // Fetch final cart from backend
+      const response = await cartAPI.getCart();
+      const backendCart = (response.items || []).map(transformBackendItem);
+      setCart(backendCart);
+      localStorage.removeItem(STORAGE_KEY); // Clear localStorage after sync
+
+      console.log('✅ Guest cart synced to backend');
+    } catch (error) {
+      console.warn('⚠️ Failed to sync guest cart:', error);
+    }
+  }, [isAuthenticated, cart]);
+
   const value = {
     cart,
+    loading,
+    hasInitialized,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
     getCartTotal,
-    getCartItemCount
+    getCartItemCount,
+    syncGuestCartToBackend,
   };
 
   return (

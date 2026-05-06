@@ -23,7 +23,8 @@ export const paymentsAPI = {
         orderId,
         description: description || `Order #${orderId}`,
       });
-      return response.data;
+      // Backend wraps response in { data: {...}, success, message }
+      return response.data.data;
     } catch (error) {
       throw new Error(
         error.response?.data?.message || 
@@ -41,7 +42,8 @@ export const paymentsAPI = {
   getPaymentStatus: async (paymentId) => {
     try {
       const response = await apiClient.get(`/payments/${paymentId}/status`);
-      return response.data;
+      // Backend wraps response in { data: {...}, success, message }
+      return response.data.data;
     } catch (error) {
       throw new Error(
         error.response?.data?.message || 

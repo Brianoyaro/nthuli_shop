@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FaShoppingCart, FaCheckCircle, FaMobileAlt, FaExclamationTriangle, FaSpinner, FaArrowLeft } from 'react-icons/fa';
-import { useCartStore } from '../store/cartStore';
+import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/Button';
 import { orderAPI } from '../services/orderAPI';
@@ -21,9 +21,7 @@ const checkoutSchema = z.object({
 export function Checkout() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const cart = useCartStore(state => state.cart);
-  const getCartTotal = useCartStore(state => state.getCartTotal);
-  const clearCart = useCartStore(state => state.clearCart);
+  const { cart, getCartTotal, clearCart } = useCart();
   const { success: showSuccess } = useToast();
   
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -251,8 +249,8 @@ export function Checkout() {
 
   // Checkout form screen
   const total = getCartTotal();
-  const shipping = total > 50 ? 0 : 9.99;
-  const tax = total * 0.1;
+  const shipping = total > 50 ? 0 : 0;
+  const tax = total * 0.0;
   const finalTotal = total + shipping + tax;
 
   const onSubmit = async (data) => {

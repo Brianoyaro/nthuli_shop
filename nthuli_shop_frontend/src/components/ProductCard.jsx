@@ -1,8 +1,8 @@
-import { useCartStore } from '../store/cartStore';
+import { useCart } from '../hooks/useCart';
 import { useToast } from '../context/ToastContext';
 
 export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
-  const addToCart = useCartStore(state => state.addToCart);
+  const { addToCart } = useCart();
   const { success } = useToast();
 
   const handleAddToCart = () => {

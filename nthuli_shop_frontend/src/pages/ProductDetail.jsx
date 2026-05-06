@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useCartStore } from '../store/cartStore';
+import { useCart } from '../hooks/useCart';
 import { useToast } from '../context/ToastContext';
 import { ImageGallery } from '../components/ImageGallery';
 import { ProductCard } from '../components/ProductCard';
@@ -11,7 +11,7 @@ import { productsAPI } from '../services/api';
 export function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const addToCart = useCartStore(state => state.addToCart);
+  const { addToCart } = useCart();
   const { success } = useToast();
   const [quantity, setQuantity] = useState(1);
   const carouselRef = useRef(null);

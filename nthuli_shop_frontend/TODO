@@ -1,10 +1,17 @@
-add a side bar -similar to jumia or Kilimall-
+<!-- add a side bar -similar to jumia or Kilimall- -->
 Add marked price and selling price (similar to jumia where the marked price is slashed with a red line and a discount percentage calculated)
 
 Intergrate M-Pesa STK push notifications
-
-Integrate stripe
+<!-- Integrate stripe -->
 
 
 
 Add order history/tracking page
+
+
+Next integration priorities:
+-------------------------------------
+Test the full flow end-to-end
+Update ProductCard to use cartAPI.addToCart() when authenticated
+Add cart page for backend cart display
+Create profile + orders pages

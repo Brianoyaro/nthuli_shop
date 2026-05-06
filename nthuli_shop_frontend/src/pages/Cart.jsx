@@ -1,16 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
-import { useCartStore } from '../store/cartStore';
+import { useCart } from '../hooks/useCart';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 
 export function Cart() {
   const navigate = useNavigate();
-  const cart = useCartStore(state => state.cart);
-  const removeFromCart = useCartStore(state => state.removeFromCart);
-  const updateQuantity = useCartStore(state => state.updateQuantity);
-  const clearCart = useCartStore(state => state.clearCart);
-  const getCartTotal = useCartStore(state => state.getCartTotal);
+  const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
   
   const total = getCartTotal();
 
@@ -135,13 +131,13 @@ export function Cart() {
                 <div className="flex justify-between">
                   <span className="text-gray-700">Shipping</span>
                   <span className="font-semibold">
-                    {total > 50 ? 'FREE' : 'KSH 9.99'}
+                    {total > 50 ? 'FREE' : 'KSH 0.00'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Tax</span>
                   <span className="font-semibold">
-                    KSH {(total * 0.1).toFixed(2)}
+                    KSH {(total * 0.0).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -150,7 +146,7 @@ export function Cart() {
               <div className="flex justify-between items-center mb-6 pb-6 border-b border-gray-200">
                 <span className="text-xl font-bold text-gray-900">Total</span>
                 <span className="text-2xl font-bold text-blue-600">
-                  KSH {(total + (total > 50 ? 0 : 9.99) + total * 0.1).toFixed(2)}
+                  KSH {(total + (total > 50 ? 0 : 0) + total * 0.0).toFixed(2)}
                 </span>
               </div>
 

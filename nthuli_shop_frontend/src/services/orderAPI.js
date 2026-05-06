@@ -20,7 +20,8 @@ export const orderAPI = {
       console.log('📤 Creating order from cart:', orderData);
       const response = await apiClient.post('/orders/from-cart', orderData);
       console.log('✅ Order created from cart:', response.data);
-      return response.data;
+      // Backend wraps order in { data: {...}, success, message }
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -43,7 +44,7 @@ export const orderAPI = {
       console.log('📦 Fetching order:', orderId);
       const response = await apiClient.get(`/orders/${orderId}`);
       console.log('✅ Order fetched:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -64,7 +65,7 @@ export const orderAPI = {
       console.log('📋 Fetching user orders');
       const response = await apiClient.get('/orders/user/all');
       console.log('✅ User orders fetched:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -85,7 +86,7 @@ export const orderAPI = {
       console.log('✅ Fetching completed orders');
       const response = await apiClient.get('/orders/user/completed');
       console.log('✅ Completed orders fetched:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -106,7 +107,7 @@ export const orderAPI = {
       console.log('⏳ Fetching pending orders');
       const response = await apiClient.get('/orders/user/pending');
       console.log('✅ Pending orders fetched:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -128,7 +129,7 @@ export const orderAPI = {
       console.log('❌ Cancelling order:', orderId);
       const response = await apiClient.put(`/orders/${orderId}/cancel`);
       console.log('✅ Order cancelled:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -151,7 +152,7 @@ export const orderAPI = {
       console.log('🔄 Updating order status:', { orderId, status });
       const response = await apiClient.put(`/orders/${orderId}/status/${status}`);
       console.log('✅ Order status updated:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
@@ -173,7 +174,7 @@ export const orderAPI = {
       console.log('🗑️ Deleting order:', orderId);
       const response = await apiClient.delete(`/orders/${orderId}`);
       console.log('✅ Order deleted:', response.data);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
