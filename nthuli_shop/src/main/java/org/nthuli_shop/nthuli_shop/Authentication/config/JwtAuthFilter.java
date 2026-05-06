@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Configuration
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -36,6 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // Skip JWT authentication for endpoints that are public
         final String requestPath = request.getServletPath();
         if (requestPath.startsWith("/api/auth/")) {
+            log.debug("Skipping JWT auth for public endpoint: {}", requestPath);
             filterChain.doFilter(request, response);
             return;
         }
@@ -61,13 +64,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             // extract username from jwt
             userEmail = jwtService.extractUsername(token);
+            log.info("✅ Extracted email from token: " + userEmail);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
+                log.info("✅ Loaded user details for: " + userEmail);
 
                 if (jwtService.isTokenValid(token, userDetails)) {
+                    log.info("✅ Token is valid for user: " + userEmail);
+                    
                     // validate the audience and issuer to prevent JWT tampering
-                    if (jwtService.validateAudience(token) && jwtService.validateIssuer(token)) {
+                    boolean audienceValid = jwtService.validateAudience(token);
+                    boolean issuerValid = jwtService.validateIssuer(token);
+                    
+                    log.info("🔐 Token validation - Audience valid: " + audienceValid + ", Issuer valid: " + issuerValid);
+                    
+                    if (audienceValid && issuerValid) {
                         // create authentication token
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -82,12 +94,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                         // set authentication in the security context
                         SecurityContextHolder.getContext().setAuthentication(authentication);
+                        log.info("✅ Authentication set for user: " + userEmail);
+                    } else {
+                        log.warn("❌ Token validation failed - Audience: " + audienceValid + ", Issuer: " + issuerValid);
                     }
+                } else {
+                    log.warn("❌ Token is invalid for user: " + userEmail);
                 }
             }
         } catch (Exception e) {
-            logger.error("JWT authentication exception", e);
-//            e.printStackTrace();
+            log.error("❌ JWT authentication exception: " + e.getMessage(), e);
         }
 
         // continue with the next filter chain

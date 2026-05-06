@@ -3,6 +3,7 @@ package org.nthuli_shop.nthuli_shop.Authentication.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@Slf4j
 public class JwtService {
     // JWT logic goes here
     @Value("${jwt.secret.key}")
@@ -59,13 +61,18 @@ public class JwtService {
     // Validate issuer claim
     public boolean validateIssuer(String token) {
         String tokenIssuer = extractClaim(token, Claims::getIssuer);
-        return issuer.equals(tokenIssuer);
+        boolean isValid = issuer.equals(tokenIssuer);
+        log.info("🔐 Issuer Validation - Expected: '{}', Got: '{}', Valid: {}", issuer, tokenIssuer, isValid);
+        return isValid;
     }
 
     // validate audience claim
     public boolean validateAudience(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.getAudience().contains(audience);
+        java.util.Set<String> audiences = claims.getAudience();
+        boolean isValid = audiences != null && audiences.contains(audience);
+        log.info("🔐 Audience Validation - Expected: '{}', Got: {}, Valid: {}", audience, audiences, isValid);
+        return isValid;
     }
 
     // get access token expiration time in milliseconds

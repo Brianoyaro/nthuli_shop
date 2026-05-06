@@ -27,51 +27,95 @@ public class PaymentService {
      * Initiate M-Pesa STK Push payment for authenticated user
      */
     public MpesaStkPushResponse initiateMpesaPayment(User user, MpesaStkPushRequest request) {
-        log.info("Initiating M-Pesa payment for user: {} order: {} with amount: {}", 
+        log.info("[PAYMENT_SERVICE] initiateMpesaPayment START - UserId: {}, OrderId: {}, Amount: {}", 
                 user.getId(), request.getOrderId(), request.getAmount());
-        return mpesaService.initiateStkPush(user, request);
+        try {
+            MpesaStkPushResponse response = mpesaService.initiateStkPush(user, request);
+            log.info("[PAYMENT_SERVICE] initiateMpesaPayment SUCCESS - CheckoutRequestId: {}", 
+                    response.getCheckoutRequestId());
+            return response;
+        } catch (Exception e) {
+            log.error("[PAYMENT_SERVICE] initiateMpesaPayment FAILED", e);
+            throw e;
+        }
     }
 
     /**
      * Get payment by ID and convert to DTO
      */
     public PaymentResponseDto getPaymentById(Long paymentId) {
-        Payment payment = mpesaService.getPaymentById(paymentId);
-        return convertToDto(payment);
+        log.info("[PAYMENT_SERVICE] getPaymentById START - PaymentId: {}", paymentId);
+        try {
+            Payment payment = mpesaService.getPaymentById(paymentId);
+            PaymentResponseDto dto = convertToDto(payment);
+            log.info("[PAYMENT_SERVICE] getPaymentById SUCCESS - Status: {}", dto.getPaymentStatus());
+            return dto;
+        } catch (Exception e) {
+            log.error("[PAYMENT_SERVICE] getPaymentById FAILED - PaymentId: {}", paymentId, e);
+            throw e;
+        }
     }
 
     /**
      * Get payment by order ID and convert to DTO
      */
     public PaymentResponseDto getPaymentByOrderId(Long orderId) {
-        Payment payment = mpesaService.getPaymentByOrderId(orderId);
-        return convertToDto(payment);
+        log.info("[PAYMENT_SERVICE] getPaymentByOrderId START - OrderId: {}", orderId);
+        try {
+            Payment payment = mpesaService.getPaymentByOrderId(orderId);
+            PaymentResponseDto dto = convertToDto(payment);
+            log.info("[PAYMENT_SERVICE] getPaymentByOrderId SUCCESS - PaymentId: {}, Status: {}", 
+                    dto.getId(), dto.getPaymentStatus());
+            return dto;
+        } catch (Exception e) {
+            log.error("[PAYMENT_SERVICE] getPaymentByOrderId FAILED - OrderId: {}", orderId, e);
+            throw e;
+        }
     }
 
     /**
      * Get all user payments
      */
     public List<PaymentResponseDto> getUserPayments(User user) {
-        return paymentRepository.findByUser(user)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        log.info("[PAYMENT_SERVICE] getUserPayments START - UserId: {}", user.getId());
+        try {
+            List<PaymentResponseDto> payments = paymentRepository.findByUser(user)
+                    .stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            log.info("[PAYMENT_SERVICE] getUserPayments SUCCESS - Found {} payments", payments.size());
+            return payments;
+        } catch (Exception e) {
+            log.error("[PAYMENT_SERVICE] getUserPayments FAILED - UserId: {}", user.getId(), e);
+            throw e;
+        }
     }
 
     /**
      * Get completed user payments
      */
     public List<PaymentResponseDto> getUserCompletedPayments(User user) {
-        return paymentRepository.findByUserAndPaymentStatus(user, PaymentStatus.COMPLETED)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        log.info("[PAYMENT_SERVICE] getUserCompletedPayments START - UserId: {}", user.getId());
+        try {
+            List<PaymentResponseDto> payments = paymentRepository.findByUserAndPaymentStatus(user, PaymentStatus.COMPLETED)
+                    .stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            log.info("[PAYMENT_SERVICE] getUserCompletedPayments SUCCESS - Found {} completed payments", 
+                    payments.size());
+            return payments;
+        } catch (Exception e) {
+            log.error("[PAYMENT_SERVICE] getUserCompletedPayments FAILED - UserId: {}", user.getId(), e);
+            throw e;
+        }
     }
 
     /**
      * Convert Payment entity to DTO
      */
     private PaymentResponseDto convertToDto(Payment payment) {
+        log.debug("[PAYMENT_SERVICE] Converting Payment to DTO - PaymentId: {}, Status: {}", 
+                payment.getId(), payment.getPaymentStatus());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         
         return PaymentResponseDto.builder()

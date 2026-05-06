@@ -37,31 +37,40 @@ public class PaymentController {
             @AuthenticationPrincipal User user,
             @RequestBody MpesaStkPushRequest request) {
         try {
+            log.info("[PAYMENT_FLOW] STK Push request received - User: {}, Order: {}, Amount: {}, Phone: {}",
+                    user.getId(), request.getOrderId(), request.getAmount(), request.getPhoneNumber());
+            
             // Validate phone number
             if (request.getPhoneNumber() == null || request.getPhoneNumber().isEmpty()) {
+                log.warn("[PAYMENT_FLOW] Validation failed: Phone number is required");
                 return ResponseEntity.badRequest()
                         .body(createErrorResponse("Phone number is required"));
             }
 
             // Validate amount
             if (request.getAmount() == null || request.getAmount().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                log.warn("[PAYMENT_FLOW] Validation failed: Invalid amount - {}", request.getAmount());
                 return ResponseEntity.badRequest()
                         .body(createErrorResponse("Amount must be greater than 0"));
             }
 
             // Validate order ID
             if (request.getOrderId() == null) {
+                log.warn("[PAYMENT_FLOW] Validation failed: Order ID is required");
                 return ResponseEntity.badRequest()
                         .body(createErrorResponse("Order ID is required"));
             }
 
+            log.info("[PAYMENT_FLOW] All validations passed, calling PaymentService");
             MpesaStkPushResponse response = paymentService.initiateMpesaPayment(user, request);
             
+            log.info("[PAYMENT_FLOW] STK Push response received - CheckoutRequestId: {}, ResponseCode: {}",
+                    response.getCheckoutRequestId(), response.getResponseCode());
             return ResponseEntity.ok()
                     .body(createSuccessResponse("STK Push initiated successfully", response));
 
         } catch (Exception e) {
-            log.error("Error initiating M-Pesa STK Push", e);
+            log.error("[PAYMENT_FLOW] ERROR initiating M-Pesa STK Push", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to initiate STK Push: " + e.getMessage()));
         }
@@ -74,15 +83,18 @@ public class PaymentController {
     @PostMapping("/mpesa/callback")
     public ResponseEntity<?> mpesaCallback(@RequestBody MpesaCallbackResponse callbackResponse) {
         try {
-            log.info("Received M-Pesa callback");
+            log.info("[PAYMENT_FLOW] M-Pesa callback received");
+            log.debug("[PAYMENT_FLOW] Callback payload: {}", callbackResponse);
+            
             mpesaService.handleMpesaCallback(callbackResponse);
             
+            log.info("[PAYMENT_FLOW] Callback processed successfully");
             // M-Pesa expects a success response
             return ResponseEntity.ok()
                     .body(Map.of("ResultCode", 0, "ResultDesc", "Callback received successfully"));
 
         } catch (Exception e) {
-            log.error("Error processing M-Pesa callback", e);
+            log.error("[PAYMENT_FLOW] ERROR processing M-Pesa callback", e);
             return ResponseEntity.ok()
                     .body(Map.of("ResultCode", 1, "ResultDesc", "Error processing callback"));
         }
@@ -98,10 +110,12 @@ public class PaymentController {
             @AuthenticationPrincipal User user,
             @PathVariable Long paymentId) {
         try {
+            log.info("[PAYMENT_FLOW] Get payment request - PaymentId: {}, UserId: {}", paymentId, user.getId());
             PaymentResponseDto payment = paymentService.getPaymentById(paymentId);
+            log.info("[PAYMENT_FLOW] Payment retrieved - Status: {}", payment.getPaymentStatus());
             return ResponseEntity.ok(createSuccessResponse("Payment retrieved successfully", payment));
         } catch (Exception e) {
-            log.error("Error retrieving payment", e);
+            log.error("[PAYMENT_FLOW] ERROR retrieving payment - PaymentId: {}", paymentId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Payment not found"));
         }
@@ -114,10 +128,12 @@ public class PaymentController {
     @GetMapping("/order/{orderId}")
     public ResponseEntity<?> getPaymentByOrderId(@PathVariable Long orderId) {
         try {
+            log.info("[PAYMENT_FLOW] Get payment by order - OrderId: {}", orderId);
             PaymentResponseDto payment = paymentService.getPaymentByOrderId(orderId);
+            log.info("[PAYMENT_FLOW] Payment found - PaymentId: {}, Status: {}", payment.getId(), payment.getPaymentStatus());
             return ResponseEntity.ok(createSuccessResponse("Payment retrieved successfully", payment));
         } catch (Exception e) {
-            log.error("Error retrieving payment for order", e);
+            log.error("[PAYMENT_FLOW] ERROR retrieving payment for order - OrderId: {}", orderId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Payment not found for this order"));
         }
@@ -132,16 +148,19 @@ public class PaymentController {
     public ResponseEntity<?> getUserPayments(@AuthenticationPrincipal User user) {
         try {
             if (user == null) {
+                log.warn("[PAYMENT_FLOW] User not authenticated for get all payments");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(createErrorResponse("User not authenticated"));
             }
 
+            log.info("[PAYMENT_FLOW] Get all payments for user - UserId: {}", user.getId());
             List<PaymentResponseDto> payments = paymentService.getUserPayments(user);
+            log.info("[PAYMENT_FLOW] Retrieved {} payments for user", payments.size());
             
             return ResponseEntity.ok(createSuccessResponse("User payments retrieved successfully", payments));
 
         } catch (Exception e) {
-            log.error("Error retrieving user payments", e);
+            log.error("[PAYMENT_FLOW] ERROR retrieving user payments", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to retrieve payments"));
         }
@@ -156,16 +175,19 @@ public class PaymentController {
     public ResponseEntity<?> getUserCompletedPayments(@AuthenticationPrincipal User user) {
         try {
             if (user == null) {
+                log.warn("[PAYMENT_FLOW] User not authenticated for get completed payments");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(createErrorResponse("User not authenticated"));
             }
 
+            log.info("[PAYMENT_FLOW] Get completed payments for user - UserId: {}", user.getId());
             List<PaymentResponseDto> payments = paymentService.getUserCompletedPayments(user);
+            log.info("[PAYMENT_FLOW] Retrieved {} completed payments for user", payments.size());
             
             return ResponseEntity.ok(createSuccessResponse("Completed payments retrieved successfully", payments));
 
         } catch (Exception e) {
-            log.error("Error retrieving completed payments", e);
+            log.error("[PAYMENT_FLOW] ERROR retrieving completed payments", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to retrieve completed payments"));
         }
