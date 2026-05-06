@@ -23,8 +23,11 @@ export const paymentsAPI = {
         orderId,
         description: description || `Order #${orderId}`,
       });
-      // Backend wraps response in { data: {...}, success, message }
-      return response.data.data;
+      // Backend returns { data: MpesaStkPushResponse, success, message }
+      // The actual payment response is in response.data.data if wrapped, or response.data if not
+      const paymentData = response.data.data || response.data;
+      console.log('📱 M-Pesa STK Push response:', paymentData);
+      return paymentData;
     } catch (error) {
       throw new Error(
         error.response?.data?.message || 

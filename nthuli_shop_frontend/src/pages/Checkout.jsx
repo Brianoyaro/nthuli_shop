@@ -296,15 +296,17 @@ export function Checkout() {
         `Order #${newOrderId} from Nthuli Shop`
       );
 
-      if (!paymentResponse.paymentId) {
-        throw new Error('Payment initiation failed');
+      if (!paymentResponse || (!paymentResponse.checkoutRequestId && !paymentResponse.paymentId)) {
+        throw new Error('Payment initiation failed - no checkout request ID received');
       }
 
-      setPaymentId(paymentResponse.paymentId);
+      // Get the payment ID - could be in different fields depending on backend response
+      const paymentId = paymentResponse.checkoutRequestId || paymentResponse.paymentId;
+      setPaymentId(paymentId);
       setPaymentState('checking');
       showSuccess('M-Pesa prompt sent. Please check your phone and enter your PIN.');
 
-      console.log('✅ M-Pesa payment initiated:', paymentResponse.paymentId);
+      console.log('✅ M-Pesa payment initiated:', paymentId);
     } catch (err) {
       console.error('❌ Checkout error:', err);
       const errorMessage = err.message || 'Checkout failed. Please try again.';

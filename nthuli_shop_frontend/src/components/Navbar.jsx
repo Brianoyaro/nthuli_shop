@@ -348,6 +348,58 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+
+            {/* Mobile Auth Section */}
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              {isAuthenticated ? (
+                <div>
+                  <div className="px-4 py-3 bg-blue-50 rounded-lg mb-3">
+                    <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+                    <p className="text-xs text-gray-500">Authenticated</p>
+                  </div>
+                  <Link
+                    to="/profile"
+                    onClick={handleLinkClick}
+                    className="block px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <FaUser className="inline w-4 h-4 mr-2" />
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/orders"
+                    onClick={handleLinkClick}
+                    className="block px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <FaBox className="inline w-4 h-4 mr-2" />
+                    My Orders
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-2"
+                  >
+                    <FaSignOutAlt className="inline w-4 h-4 mr-2" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Link
+                    to="/login"
+                    onClick={handleLinkClick}
+                    className="flex-1 px-3 py-2 text-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={handleLinkClick}
+                    className="flex-1 px-3 py-2 text-center text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
