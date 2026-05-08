@@ -10,7 +10,9 @@ import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
 import { Cart } from './pages/Cart';
+import { OrderReview } from './pages/OrderReview';
 import { Checkout } from './pages/Checkout';
+import { PaymentMethod } from './pages/PaymentMethod';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { SearchResults } from './pages/SearchResults';
@@ -46,10 +48,26 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route
+                    path="/order-review"
+                    element={
+                      <ProtectedRoute>
+                        <OrderReview />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/checkout"
                     element={
                       <ProtectedRoute>
                         <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/checkout/payment"
+                    element={
+                      <ProtectedRoute>
+                        <PaymentMethod />
                       </ProtectedRoute>
                     }
                   />

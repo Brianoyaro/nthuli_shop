@@ -150,28 +150,13 @@ export function Cart() {
                 </span>
               </div>
 
-              {/* Promo Code */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Promo Code
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter code"
-                    className="flex-1"
-                  />
-                  <Button variant="secondary" size="md">
-                    Apply
-                  </Button>
-                </div>
-              </div>
 
               {/* Checkout Button */}
               <Button
                 variant="primary"
                 size="lg"
                 className="w-full mb-4"
-                onClick={() => navigate('/checkout')}
+                onClick={() => navigate('/order-review')}
               >
                 Proceed to Checkout
               </Button>
@@ -192,12 +177,7 @@ export function Cart() {
                 Clear Cart
               </button>
 
-              {/* Shipping Info */}
-              {total <= 50 && (
-                <div className="mt-6 bg-blue-50 rounded-lg p-4 text-sm text-blue-800">
-                  Add ${(50 - total).toFixed(2)} more for free shipping!
-                </div>
-              )}
+              
             </div>
           </div>
         </div>
