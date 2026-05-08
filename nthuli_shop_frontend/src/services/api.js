@@ -43,7 +43,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle token refresh on 401
+// Add response interceptor to handle token refresh on 401 or 403 (expired token)
 apiClient.interceptors.response.use(
   response => {
     console.log(`🟢 API Response: ${response.status} ${response.config.url}`, response.data);
@@ -52,7 +52,8 @@ apiClient.interceptors.response.use(
   error => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Handle 401 (Unauthorized) or 403 (Forbidden - likely expired token)
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
@@ -71,10 +72,12 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
 
         if (!refreshToken) {
-          console.error('❌ No refresh token available. Logging out...');
+          console.error('❌ No refresh token available. Token is:', error.response?.status === 403 ? 'EXPIRED' : 'UNAUTHORIZED');
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
+          // Dispatch logout event to notify AuthContext
+          window.dispatchEvent(new Event('logout'));
           window.location.href = '/login';
           reject(error);
           return;
@@ -99,11 +102,13 @@ apiClient.interceptors.response.use(
             resolve(apiClient(originalRequest));
           })
           .catch(err => {
-            console.error('❌ Token refresh failed:', err);
+      console.error('❌ Token refresh failed:', err);
             processQueue(err, null);
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
+            // Dispatch logout event to notify AuthContext
+            window.dispatchEvent(new Event('logout'));
             window.location.href = '/login';
             reject(err);
           })

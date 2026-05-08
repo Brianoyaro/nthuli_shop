@@ -2,6 +2,7 @@ package org.nthuli_shop.nthuli_shop.Authentication.config;
 
 import org.nthuli_shop.nthuli_shop.Authentication.service.CustomUserDetailsService;
 import org.nthuli_shop.nthuli_shop.Authentication.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -102,6 +103,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     log.warn("❌ Token is invalid for user: " + userEmail);
                 }
             }
+        } catch (ExpiredJwtException e) {
+            // JWT token has expired - return 401 Unauthorized for frontend to refresh
+            log.warn("[JWT_AUTH] Token expired: {}", e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token expired\", \"status\": 401}");
+            return;
         } catch (Exception e) {
             log.error("❌ JWT authentication exception: " + e.getMessage(), e);
         }

@@ -150,13 +150,69 @@ export function AuthProvider({ children }) {
   }, [tokenRefreshScheduled, handleRefreshToken]);
 
   /**
+   * Check if token is expired by decoding it
+   */
+  const isTokenExpired = useCallback((token) => {
+    try {
+      // Simple JWT decode (not cryptographically verifying, just reading payload)
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      
+      const payload = JSON.parse(atob(parts[1]));
+      const expiryTime = payload.exp * 1000; // Convert to milliseconds
+      const currentTime = Date.now();
+      
+      // Token is expired if expiry time is in the past
+      return currentTime > expiryTime;
+    } catch (err) {
+      console.error('Error checking token expiry:', err);
+      return true; // Consider token invalid if we can't decode it
+    }
+  }, []);
+
+  /**
    * Schedule initial token refresh if token exists
    */
   useEffect(() => {
     if (accessToken && !tokenRefreshScheduled) {
-      scheduleTokenRefresh(900000); // Assume 15 min expiry
+      // Check if token is already expired
+      if (isTokenExpired(accessToken)) {
+        console.warn('⚠️ Access token is already expired. Attempting refresh...');
+        handleRefreshToken();
+      } else {
+        // Extract expiry time from token to schedule refresh at right time
+        try {
+          const parts = accessToken.split('.');
+          const payload = JSON.parse(atob(parts[1]));
+          const expiryTime = payload.exp * 1000;
+          const currentTime = Date.now();
+          const timeUntilExpiry = expiryTime - currentTime;
+          
+          console.log(`⏰ Token expires in ${Math.round(timeUntilExpiry / 1000)} seconds`);
+          scheduleTokenRefresh(timeUntilExpiry);
+        } catch (err) {
+          // Fallback to 15 min expiry if we can't decode
+          console.error('Error decoding token:', err);
+          scheduleTokenRefresh(900000);
+        }
+      }
     }
-  }, [accessToken, tokenRefreshScheduled, scheduleTokenRefresh]);
+  }, [accessToken, tokenRefreshScheduled, scheduleTokenRefresh, isTokenExpired, handleRefreshToken]);
+
+  /**
+   * Listen for logout event from api.js when token refresh fails
+   */
+  useEffect(() => {
+    const handleLogoutEvent = () => {
+      console.log('🚪 Logout event received from api interceptor');
+      setAccessToken(null);
+      setRefreshToken(null);
+      setUser(null);
+    };
+
+    window.addEventListener('logout', handleLogoutEvent);
+    return () => window.removeEventListener('logout', handleLogoutEvent);
+  }, []);
 
   /**
    * Logout user
