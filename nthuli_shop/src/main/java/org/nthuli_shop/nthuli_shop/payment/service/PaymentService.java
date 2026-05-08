@@ -111,6 +111,23 @@ public class PaymentService {
     }
 
     /**
+     * Get payment by checkoutRequestId (stored as transactionId)
+     */
+    public PaymentResponseDto getPaymentByCheckoutRequestId(String checkoutRequestId) {
+        log.info("[PAYMENT_SERVICE] getPaymentByCheckoutRequestId START - CheckoutRequestId: {}", checkoutRequestId);
+        try {
+            Payment payment = mpesaService.getPaymentByCheckoutRequestId(checkoutRequestId);
+            PaymentResponseDto dto = convertToDto(payment);
+            log.info("[PAYMENT_SERVICE] getPaymentByCheckoutRequestId SUCCESS - PaymentId: {}, Status: {}", 
+                    dto.getId(), dto.getPaymentStatus());
+            return dto;
+        } catch (Exception e) {
+            log.error("[PAYMENT_SERVICE] getPaymentByCheckoutRequestId FAILED - CheckoutRequestId: {}", checkoutRequestId, e);
+            throw e;
+        }
+    }
+
+    /**
      * Convert Payment entity to DTO
      */
     private PaymentResponseDto convertToDto(Payment payment) {

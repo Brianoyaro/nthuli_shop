@@ -62,7 +62,8 @@ public class SecurityConfig {
                                 "/api/category/*/products", // GET products by category
                                 "/api/products",          // GET all products
                                 "/api/products/**",       // GET specific product (READ-ONLY)
-                                "/api/payments/mpesa/callback" // M-Pesa webhook callback
+                                "/api/payments/mpesa/callback", // M-Pesa webhook callback
+                                "/api/payments/status/**"  // GET payment status by checkoutRequestId (M-Pesa polling)
                         ).permitAll()
                         
                         // AUTHENTICATED USER endpoints (excluding admin methods)

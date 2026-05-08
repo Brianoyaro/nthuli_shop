@@ -38,13 +38,13 @@ export const paymentsAPI = {
   },
 
   /**
-   * Check payment status by payment ID
-   * @param {string|number} paymentId - Payment ID to check
-   * @returns {Promise<Object>} Payment status with status field (PENDING, COMPLETED, FAILED, CANCELLED)
+   * Check payment status by checkoutRequestId
+   * @param {string|number} checkoutRequestId - CheckoutRequestId from M-Pesa STK Push response
+   * @returns {Promise<Object>} Payment status with paymentStatus field (PENDING, COMPLETED, FAILED, CANCELLED)
    */
-  getPaymentStatus: async (paymentId) => {
+  getPaymentStatus: async (checkoutRequestId) => {
     try {
-      const response = await apiClient.get(`/payments/${paymentId}/status`);
+      const response = await apiClient.get(`/payments/status/${checkoutRequestId}`);
       // Backend wraps response in { data: {...}, success, message }
       return response.data.data;
     } catch (error) {

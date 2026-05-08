@@ -140,6 +140,25 @@ public class PaymentController {
     }
 
     /**
+     * Get payment by checkoutRequestId (M-Pesa STK Push status polling)
+     * GET /api/payments/status/{checkoutRequestId}
+     * Authentication: NONE REQUIRED (guest access for status polling)
+     */
+    @GetMapping("/status/{checkoutRequestId}")
+    public ResponseEntity<?> getPaymentStatus(@PathVariable String checkoutRequestId) {
+        try {
+            log.info("[PAYMENT_FLOW] Get payment status by checkoutRequestId - CheckoutRequestId: {}", checkoutRequestId);
+            PaymentResponseDto payment = paymentService.getPaymentByCheckoutRequestId(checkoutRequestId);
+            log.info("[PAYMENT_FLOW] Payment status retrieved - PaymentId: {}, Status: {}", payment.getId(), payment.getPaymentStatus());
+            return ResponseEntity.ok(createSuccessResponse("Payment status retrieved successfully", payment));
+        } catch (Exception e) {
+            log.error("[PAYMENT_FLOW] ERROR retrieving payment status - CheckoutRequestId: {}", checkoutRequestId, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Payment not found"));
+        }
+    }
+
+    /**
      * Get all payments for authenticated user
      * GET /api/payments/user/all
      * Authentication: REQUIRED

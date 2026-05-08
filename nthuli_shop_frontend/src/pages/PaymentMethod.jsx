@@ -106,7 +106,7 @@ export function PaymentMethod() {
           try {
             const status = await paymentsAPI.getPaymentStatus(payId);
 
-            if (status.status === 'COMPLETED') {
+            if (status.paymentStatus === 'COMPLETED') {
               clearInterval(pollInterval);
               clearTimeout(timeout);
 
@@ -121,11 +121,11 @@ export function PaymentMethod() {
               setPaymentState('completed');
               clearCart();
               setOrderPlaced(true);
-            } else if (status.status === 'FAILED' || status.status === 'CANCELLED') {
+            } else if (status.paymentStatus === 'FAILED' || status.paymentStatus === 'CANCELLED') {
               clearInterval(pollInterval);
               clearTimeout(timeout);
               setPaymentState(null);
-              setPaymentError(`Payment ${status.status.toLowerCase()}.Please try again.`);
+              setPaymentError(`Payment ${status.paymentStatus.toLowerCase()}.Please try again.`);
               setIsProcessing(false);
             }
           } catch (err) {

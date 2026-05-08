@@ -318,6 +318,15 @@ public class MpesaService {
     }
 
     /**
+     * Get payment by checkoutRequestId (stored as transactionId)
+     */
+    public Payment getPaymentByCheckoutRequestId(String checkoutRequestId) {
+        log.info("[MPESA_SERVICE] getPaymentByCheckoutRequestId - CheckoutRequestId: {}", checkoutRequestId);
+        return paymentRepository.findByTransactionId(checkoutRequestId)
+                .orElseThrow(() -> new RuntimeException("Payment not found with checkoutRequestId: " + checkoutRequestId));
+    }
+
+    /**
      * Get all payments for a user
      */
     public List<Payment> getUserPayments(Long userId) {
