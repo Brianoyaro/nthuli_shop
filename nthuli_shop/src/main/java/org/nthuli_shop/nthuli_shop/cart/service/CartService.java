@@ -9,6 +9,7 @@ import org.nthuli_shop.nthuli_shop.cart.entity.Cart;
 import org.nthuli_shop.nthuli_shop.cart.entity.CartItem;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartItemRepository;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartRepository;
+import org.nthuli_shop.nthuli_shop.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final ProductRepository productRepository;
 
     /**
      * Create a new cart for a user (called during registration)
@@ -154,10 +156,26 @@ public class CartService {
     }
 
     /**
-     * Convert CartItem to DTO
+     * Convert CartItem to DTO with product image
      */
     private CartItemDto convertToDto(CartItem cartItem) {
         BigDecimal subtotal = cartItem.getUnitPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+        
+        // Fetch product to get primary image
+        String imageUrl = null;
+        try {
+            var product = productRepository.findById(cartItem.getProductId());
+            if (product.isPresent() && !product.get().getImages().isEmpty()) {
+                // Get primary image or first image
+                var primaryImage = product.get().getImages().stream()
+                        .filter(img -> Boolean.TRUE.equals(img.getPrimary()))
+                        .findFirst()
+                        .orElse(product.get().getImages().get(0));
+                imageUrl = primaryImage.getImageUrl();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch product image for product {}: {}", cartItem.getProductId(), e.getMessage());
+        }
         
         return CartItemDto.builder()
                 .id(cartItem.getId())
@@ -166,6 +184,7 @@ public class CartService {
                 .unitPrice(cartItem.getUnitPrice())
                 .quantity(cartItem.getQuantity())
                 .subtotal(subtotal)
+                .imageUrl(imageUrl)
                 .build();
     }
 }

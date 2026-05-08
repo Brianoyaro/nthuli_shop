@@ -24,4 +24,6 @@ public class CartItemDto {
     private Integer quantity;
     
     private BigDecimal subtotal;
+    
+    private String imageUrl;
 }

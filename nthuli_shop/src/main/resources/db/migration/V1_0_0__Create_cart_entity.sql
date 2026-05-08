@@ -38,3 +38,4 @@ CREATE UNIQUE INDEX idx_carts_user_id ON carts(user_id);
 --       ALTER TABLE cart_items 
 --       ADD CONSTRAINT fk_cart_items_cart_id 
 --       FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE;
+

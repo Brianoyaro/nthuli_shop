@@ -14,7 +14,7 @@ const transformBackendItem = (item) => ({
   name: item.productName,
   price: parseFloat(item.unitPrice),
   quantity: item.quantity,
-  image: 'https://via.placeholder.com/300x300?text=Product',
+  image: item.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
   category: 'General',
 });
 
