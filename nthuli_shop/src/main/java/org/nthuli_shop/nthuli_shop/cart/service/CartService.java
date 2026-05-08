@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.cart.dto.AddToCartRequest;
 import org.nthuli_shop.nthuli_shop.cart.dto.CartItemDto;
+import org.nthuli_shop.nthuli_shop.cart.entity.Cart;
 import org.nthuli_shop.nthuli_shop.cart.entity.CartItem;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartItemRepository;
+import org.nthuli_shop.nthuli_shop.cart.repository.CartRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,7 +21,37 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CartService {
 
+    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+
+    /**
+     * Create a new cart for a user (called during registration)
+     */
+    @Transactional
+    public Cart createCartForUser(User user) {
+        log.info("Creating cart for user {}", user.getId());
+        
+        if (cartRepository.existsByUserId(user.getId())) {
+            log.warn("Cart already exists for user {}", user.getId());
+            return cartRepository.findByUserId(user.getId()).orElse(null);
+        }
+        
+        Cart cart = Cart.builder()
+                .user(user)
+                .build();
+        
+        Cart savedCart = cartRepository.save(cart);
+        log.info("Cart created for user {} with id {}", user.getId(), savedCart.getId());
+        return savedCart;
+    }
+
+    /**
+     * Get or create cart for user (ensures user always has a cart)
+     */
+    private Cart getOrCreateCartForUser(Long userId) {
+        return cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found for user: " + userId + ". Please contact support."));
+    }
 
     /**
      * Add item to cart or update quantity if already exists
@@ -26,7 +59,9 @@ public class CartService {
     public CartItemDto addToCart(User user, AddToCartRequest request) {
         log.info("Adding product {} to cart for user {}", request.getProductId(), user.getId());
         
-        var existingItem = cartItemRepository.findByUserIdAndProductId(user.getId(), request.getProductId());
+        Cart cart = getOrCreateCartForUser(user.getId());
+        
+        var existingItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), request.getProductId());
         
         CartItem cartItem;
         if (existingItem.isPresent()) {
@@ -35,7 +70,7 @@ public class CartService {
             log.info("Updated quantity for product {} in cart", request.getProductId());
         } else {
             cartItem = CartItem.builder()
-                    .user(user)
+                    .cart(cart)
                     .productId(request.getProductId())
                     .productName(request.getProductName())
                     .unitPrice(request.getUnitPrice())
@@ -52,7 +87,8 @@ public class CartService {
      * Get all cart items for a user
      */
     public List<CartItemDto> getCartItems(Long userId) {
-        return cartItemRepository.findByUserId(userId)
+        Cart cart = getOrCreateCartForUser(userId);
+        return cartItemRepository.findByCartId(cart.getId())
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -62,11 +98,13 @@ public class CartService {
      * Update quantity of a cart item
      */
     public CartItemDto updateCartItemQuantity(Long userId, Long cartItemId, Integer newQuantity) {
+        Cart cart = getOrCreateCartForUser(userId);
+        
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + cartItemId));
         
-        if (!cartItem.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Cart item does not belong to this user");
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("Cart item does not belong to this user's cart");
         }
         
         if (newQuantity <= 0) {
@@ -81,21 +119,26 @@ public class CartService {
     }
 
     /**
-     * Remove item from cart
+     * Remove item from cart by product ID
      */
+    @Transactional
     public void removeFromCart(Long userId, Long productId) {
-        var item = cartItemRepository.findByUserIdAndProductId(userId, productId)
+        Cart cart = getOrCreateCartForUser(userId);
+        
+        var item = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId)
                 .orElseThrow(() -> new RuntimeException("Cart item not found"));
         
-        cartItemRepository.deleteByUserIdAndProductId(userId, productId);
+        cartItemRepository.deleteByCartIdAndProductId(cart.getId(), productId);
         log.info("Removed product {} from cart for user {}", productId, userId);
     }
 
     /**
      * Clear entire cart for a user
      */
+    @Transactional
     public void clearCart(Long userId) {
-        cartItemRepository.deleteByUserId(userId);
+        Cart cart = getOrCreateCartForUser(userId);
+        cartItemRepository.deleteByCartId(cart.getId());
         log.info("Cleared cart for user {}", userId);
     }
 
@@ -103,7 +146,8 @@ public class CartService {
      * Get cart total amount
      */
     public BigDecimal getCartTotal(Long userId) {
-        return cartItemRepository.findByUserId(userId)
+        Cart cart = getOrCreateCartForUser(userId);
+        return cartItemRepository.findByCartId(cart.getId())
                 .stream()
                 .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

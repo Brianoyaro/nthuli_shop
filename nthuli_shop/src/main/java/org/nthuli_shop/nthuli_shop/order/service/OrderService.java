@@ -3,7 +3,9 @@ package org.nthuli_shop.nthuli_shop.order.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
+import org.nthuli_shop.nthuli_shop.cart.entity.Cart;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartItemRepository;
+import org.nthuli_shop.nthuli_shop.cart.repository.CartRepository;
 import org.nthuli_shop.nthuli_shop.order.dto.OrderItemDto;
 import org.nthuli_shop.nthuli_shop.order.dto.OrderResponseDto;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
 
     /**
@@ -33,8 +36,12 @@ public class OrderService {
     public OrderResponseDto createOrderFromCart(User user, String shippingAddress, String notes, String description) {
         log.info("Creating order from cart for user: {}", user.getId());
         
-        // Get all cart items for user
-        var cartItems = cartItemRepository.findByUserId(user.getId());
+        // Get user's cart
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Cart not found for user: " + user.getId()));
+        
+        // Get all cart items for user's cart
+        var cartItems = cartItemRepository.findByCartId(cart.getId());
         
         if (cartItems.isEmpty()) {
             throw new RuntimeException("Cart is empty. Cannot create order from empty cart");
@@ -72,7 +79,7 @@ public class OrderService {
         log.info("Order created successfully with ID: {} for user: {}", savedOrder.getId(), user.getId());
         
         // Clear user's cart after order creation
-        cartItemRepository.deleteByUserId(user.getId());
+        cartItemRepository.deleteByCartId(cart.getId());
         log.info("Cart cleared for user: {}", user.getId());
         
         return convertToDto(savedOrder);

@@ -1,0 +1,18 @@
+
+> nthuli-shop-api@1.0.0 start
+> node index.js
+
+Executing (default): SELECT 1+1 AS result
+Database connection established
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Users' AND TABLE_SCHEMA = 'nthuli_shop'
+Executing (default): SHOW INDEX FROM `Users`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Categories' AND TABLE_SCHEMA = 'nthuli_shop'
+Executing (default): SHOW INDEX FROM `Categories`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Products' AND TABLE_SCHEMA = 'nthuli_shop'
+Executing (default): SHOW INDEX FROM `Products`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'ProductImages' AND TABLE_SCHEMA = 'nthuli_shop'
+Executing (default): SHOW INDEX FROM `ProductImages`
+Executing (default): SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = 'Payments' AND TABLE_SCHEMA = 'nthuli_shop'
+Executing (default): SHOW INDEX FROM `Payments`
+Database models synchronized
+Server running on port 8080

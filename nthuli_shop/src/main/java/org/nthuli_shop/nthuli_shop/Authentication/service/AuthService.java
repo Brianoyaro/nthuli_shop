@@ -1,6 +1,5 @@
 package org.nthuli_shop.nthuli_shop.Authentication.service;
 
-//import com.oyaro_corp.oyaro.corporation.cart.service.CartService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.nthuli_shop.nthuli_shop.Authentication.dto.AuthResponse;
@@ -10,10 +9,9 @@ import org.nthuli_shop.nthuli_shop.Authentication.dto.RegisterRequest;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.Role;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.Authentication.repository.UserRepository;
+import org.nthuli_shop.nthuli_shop.cart.service.CartService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-
-
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,15 +25,14 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final CartService cartService;
 
-//    private CartService cartService;
-
-    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
+    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder, CartService cartService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
-//        this.cartService = cartService;
+        this.cartService = cartService;
     }
 
     // register
@@ -59,10 +56,9 @@ public class AuthService {
         userRepository.save(user);
 
         // create cart for each user when they're created
-//        if (user.getRole() != Role.ADMIN) {
-//            //
-//            cartService.createCartForUser(user);
-//        }
+        if (user.getRole() != Role.ADMIN) {
+            cartService.createCartForUser(user);
+        }
 
         // generate access and refresh access tokens
         String accessToken = jwtService.generateAccessToken(user);
@@ -74,10 +70,6 @@ public class AuthService {
                 jwtService.getAccessTokenExpiration()
         );
     }
-
-
-    // login
-    @Transactional
     public AuthResponse authenticate(@RequestBody AuthRequest authRequest, HttpServletRequest request) {
         // authenticate the user
         authenticationManager.authenticate(

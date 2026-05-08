@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -22,8 +21,8 @@ public class CartItem {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "cart_id", nullable = false)
+    private Cart cart;
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
