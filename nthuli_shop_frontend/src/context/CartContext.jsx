@@ -8,9 +8,11 @@ const STORAGE_KEY = 'nthuli_cart';
 
 /**
  * Transforms backend cart format to UI format
+ * Preserves both CartItem ID and Product ID for different API operations
  */
 const transformBackendItem = (item) => ({
-  id: item.productId,
+  id: item.id, // CartItem ID for update operations
+  productId: item.productId, // Product ID for removal
   name: item.productName,
   price: parseFloat(item.unitPrice),
   quantity: item.quantity,
@@ -180,21 +182,25 @@ export function CartProvider({ children }) {
    * Remove product from cart
    */
   const removeFromCart = useCallback(
-    async (productId) => {
+    async (cartItemId) => {
       try {
         setLoading(true);
-        console.log('🗑️ Removing from cart:', productId);
+        console.log('🗑️ Removing from cart:', cartItemId);
 
         if (isAuthenticated) {
-          // Call backend
-          await cartAPI.removeFromCart(productId);
-          // Refetch cart from backend
-          const response = await cartAPI.getCart();
-          const backendCart = (response.items || []).map(transformBackendItem);
-          setCart(backendCart);
+          // Find the item to get its product ID
+          const item = cart.find(i => i.id === cartItemId);
+          if (item) {
+            // Call backend with product ID
+            await cartAPI.removeFromCart(item.productId);
+            // Refetch cart from backend
+            const response = await cartAPI.getCart();
+            const backendCart = (response.items || []).map(transformBackendItem);
+            setCart(backendCart);
+          }
         } else {
           // Update localStorage
-          const updatedCart = cart.filter((item) => item.id !== productId);
+          const updatedCart = cart.filter((item) => item.id !== cartItemId);
           setCart(updatedCart);
           saveToLocalStorage(updatedCart);
         }
@@ -214,27 +220,27 @@ export function CartProvider({ children }) {
    * Update product quantity in cart
    */
   const updateQuantity = useCallback(
-    async (productId, quantity) => {
+    async (cartItemId, quantity) => {
       try {
         if (quantity <= 0) {
-          await removeFromCart(productId);
+          await removeFromCart(cartItemId);
           return;
         }
 
         setLoading(true);
-        console.log('✏️ Updating quantity:', { productId, quantity });
+        console.log('✏️ Updating quantity:', { cartItemId, quantity });
 
         if (isAuthenticated) {
-          // Call backend
-          await cartAPI.updateQuantity(productId, quantity);
+          // Call backend with CartItem ID (not product ID)
+          await cartAPI.updateQuantity(cartItemId, quantity);
           // Refetch cart from backend
           const response = await cartAPI.getCart();
           const backendCart = (response.items || []).map(transformBackendItem);
           setCart(backendCart);
         } else {
-          // Update localStorage
+          // Update localStorage - guest cart uses product ID
           const updatedCart = cart.map((item) =>
-            item.id === productId ? { ...item, quantity } : item
+            item.id === cartItemId ? { ...item, quantity } : item
           );
           setCart(updatedCart);
           saveToLocalStorage(updatedCart);
@@ -260,10 +266,10 @@ export function CartProvider({ children }) {
       console.log('🧹 Clearing cart');
 
       if (isAuthenticated) {
-        // Remove all items from backend
+        // Remove all items from backend using product ID
         for (const item of cart) {
           try {
-            await cartAPI.removeFromCart(item.id);
+            await cartAPI.removeFromCart(item.productId);
           } catch (err) {
             console.warn(`⚠️ Failed to remove item ${item.id} from backend:`, err);
           }
