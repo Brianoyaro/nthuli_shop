@@ -23,6 +23,49 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [previousAuthState, setPreviousAuthState] = useState(null);
+
+  /**
+   * Migrate cart from localStorage to backend when user logs in
+   */
+  const migrateGuestCartToBackend = useCallback(async () => {
+    try {
+      const storedCart = localStorage.getItem(STORAGE_KEY);
+      if (!storedCart) {
+        console.log('📭 No guest cart to migrate');
+        return;
+      }
+
+      const guestCart = JSON.parse(storedCart);
+      if (!guestCart || guestCart.length === 0) {
+        console.log('📭 Guest cart is empty');
+        return;
+      }
+
+      console.log('🔄 Migrating guest cart to backend:', guestCart.length, 'items');
+
+      // Add each item from guest cart to backend
+      for (const item of guestCart) {
+        try {
+          await cartAPI.addToCart(
+            item.id,
+            item.name,
+            item.price,
+            item.quantity
+          );
+          console.log('✅ Migrated item to backend:', item.name);
+        } catch (error) {
+          console.error('❌ Failed to migrate item:', item.name, error);
+        }
+      }
+
+      // Clear localStorage after migration
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('✅ Cart migration complete - localStorage cleared');
+    } catch (error) {
+      console.error('❌ Cart migration failed:', error);
+    }
+  }, []);
 
   /**
    * Initialize cart: Load from localStorage or fetch from backend
@@ -35,6 +78,12 @@ export function CartProvider({ children }) {
         setLoading(true);
 
         if (isAuthenticated) {
+          // Check if this is a transition from guest to authenticated
+          if (previousAuthState === false) {
+            console.log('🔐 User just logged in - migrating guest cart');
+            await migrateGuestCartToBackend();
+          }
+
           // Authenticated: Fetch from backend
           console.log('👤 Authenticated user - fetching cart from backend');
           const response = await cartAPI.getCart();
@@ -52,11 +101,12 @@ export function CartProvider({ children }) {
       } finally {
         setLoading(false);
         setHasInitialized(true);
+        setPreviousAuthState(isAuthenticated);
       }
     };
 
     initializeCart();
-  }, [isAuthenticated, authLoading]);
+  }, [isAuthenticated, authLoading, migrateGuestCartToBackend, previousAuthState]);
 
   /**
    * Save cart to localStorage (for guests)
