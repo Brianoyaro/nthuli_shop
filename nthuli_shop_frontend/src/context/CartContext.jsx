@@ -26,7 +26,7 @@ const transformBackendItem = (item) => {
     price: parseFloat(item.unitPrice),
     quantity: item.quantity,
     image: imageUrl,
-    category: 'General',
+    category: item.productCategory || 'General',
   };
 };
 

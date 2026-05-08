@@ -156,25 +156,34 @@ public class CartService {
     }
 
     /**
-     * Convert CartItem to DTO with product image
+     * Convert CartItem to DTO with product image and category
      */
     private CartItemDto convertToDto(CartItem cartItem) {
         BigDecimal subtotal = cartItem.getUnitPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
         
-        // Fetch product to get primary image
+        // Fetch product to get image and category
         String imageUrl = null;
+        String productCategory = null;
         try {
             var product = productRepository.findById(cartItem.getProductId());
-            if (product.isPresent() && !product.get().getImages().isEmpty()) {
+            if (product.isPresent()) {
                 // Get primary image or first image
-                var primaryImage = product.get().getImages().stream()
-                        .filter(img -> Boolean.TRUE.equals(img.getPrimary()))
-                        .findFirst()
-                        .orElse(product.get().getImages().get(0));
-                imageUrl = primaryImage.getImageUrl();
+                if (!product.get().getImages().isEmpty()) {
+                    var primaryImage = product.get().getImages().stream()
+                            .filter(img -> Boolean.TRUE.equals(img.getPrimary()))
+                            .findFirst()
+                            .orElse(product.get().getImages().get(0));
+                    imageUrl = primaryImage.getImageUrl();
+                }
+                
+                // Get product category
+                if (product.get().getCategory() != null) {
+                    productCategory = product.get().getCategory().getName();
+                    log.debug("Fetched product category: {}", productCategory);
+                }
             }
         } catch (Exception e) {
-            log.warn("Failed to fetch product image for product {}: {}", cartItem.getProductId(), e.getMessage());
+            log.warn("Failed to fetch product details for product {}: {}", cartItem.getProductId(), e.getMessage());
         }
         
         return CartItemDto.builder()
@@ -185,6 +194,7 @@ public class CartService {
                 .quantity(cartItem.getQuantity())
                 .subtotal(subtotal)
                 .imageUrl(imageUrl)
+                .productCategory(productCategory)
                 .build();
     }
 }
