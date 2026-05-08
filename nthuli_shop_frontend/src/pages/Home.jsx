@@ -4,18 +4,30 @@ import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { productsAPI } from '../services/api';
 
+// Import carousel images for proper Vite asset resolution
+import shoesImage from '../assets/home-carousal/shoes.jpg?url';
+import clothesImage from '../assets/home-carousal/clothes.jpg?url';
+import furnitureImage from '../assets/home-carousal/furniture.jpg?url';
+import kitchenImage from '../assets/home-carousal/kitchen_appliance.jpg?url';
+
+// Import category images for proper Vite asset resolution
+import shoesCategoryImage from '../assets/shoes-category.jpg?url';
+import clothesCategoryImage from '../assets/clothes-category.jpg?url';
+import furnitureCategoryImage from '../assets/furniture-category.jpg?url';
+import kitchenAppliancesCategoryImage from '../assets/kitchen_appliances-category.jpg?url';
+
 export function Home() {
   const navigate = useNavigate();
   const scrollContainers = useRef({});
   const [scrollPositions, setScrollPositions] = useState({});
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Carousel images
+  // Carousel images with proper Vite asset imports
   const carouselImages = [
-    '/home-carousal/shoes.jpg',
-    '/home-carousal/clothes.jpg',
-    '/home-carousal/furniture.jpg',
-    '/home-carousal/kitchen_appliance.jpg',
+    shoesImage,
+    clothesImage,
+    furnitureImage,
+    kitchenImage,
   ];
 
   // Auto-rotate carousel images every 5 seconds
@@ -226,10 +238,10 @@ export function Home() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { id: 1, name: 'Shoes', slug: 'shoes', image: '/shoes-category.jpg' },
-              { id: 2, name: 'Clothes', slug: 'clothes', image: '/clothes-category.jpg' },
-              { id: 3, name: 'Furniture', slug: 'furniture', image: '/furniture-category.jpg' },
-              { id: 4, name: 'Kitchen Appliances', slug: 'kitchen', image: '/kitchen_appliances-category.jpg' },
+              { id: 1, name: 'Shoes', slug: 'shoes', image: shoesCategoryImage },
+              { id: 2, name: 'Clothes', slug: 'clothes', image: clothesCategoryImage },
+              { id: 3, name: 'Furniture', slug: 'furniture', image: furnitureCategoryImage },
+              { id: 4, name: 'Kitchen Appliances', slug: 'kitchen', image: kitchenAppliancesCategoryImage },
             ].map(category => (
               <div
                 key={category.id}

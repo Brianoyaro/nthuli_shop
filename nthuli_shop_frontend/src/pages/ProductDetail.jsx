@@ -66,7 +66,8 @@ export function ProductDetail() {
   }
 
   // Generate gallery images from product images
-  const galleryImages = product.images?.map(img => `http://localhost:8080${img.imageUrl}`) || [
+  const API_IMAGE_BASE_URL = import.meta.env.VITE_API_IMAGE_BASE_URL || 'http://localhost:8080';
+  const galleryImages = product.images?.map(img => `${API_IMAGE_BASE_URL}${img.imageUrl}`) || [
     'https://via.placeholder.com/500x600?text=Product+Image'
   ];
 

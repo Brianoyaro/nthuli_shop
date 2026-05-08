@@ -12,8 +12,9 @@ export function ProductCard({ product, onViewDetails, variant = 'grid' }) {
 
   // Get primary image or first image
   const primaryImage = product.images?.find(img => img.primary) || product.images?.[0];
+  const API_IMAGE_BASE_URL = import.meta.env.VITE_API_IMAGE_BASE_URL || 'http://localhost:8080';
   const imageUrl = primaryImage?.imageUrl
-    ? `http://localhost:8080${primaryImage.imageUrl}`
+    ? `${API_IMAGE_BASE_URL}${primaryImage.imageUrl}`
     : 'https://via.placeholder.com/300x300?text=No+Image';
 
   // Calculate discount (mock data - can be added to backend later)

@@ -11,12 +11,12 @@ const STORAGE_KEY = 'nthuli_cart';
  * Preserves both CartItem ID and Product ID for different API operations
  */
 const transformBackendItem = (item) => {
-  const API_BASE_URL = 'http://localhost:8080';
+  const API_IMAGE_BASE_URL = import.meta.env.VITE_API_IMAGE_BASE_URL || 'http://localhost:8080';
   
   // Convert relative image URL to absolute URL
   let imageUrl = item.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image';
   if (imageUrl.startsWith('/')) {
-    imageUrl = `${API_BASE_URL}${imageUrl}`;
+    imageUrl = `${API_IMAGE_BASE_URL}${imageUrl}`;
   }
   
   return {
