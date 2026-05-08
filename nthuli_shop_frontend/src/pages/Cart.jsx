@@ -51,7 +51,7 @@ export function Cart() {
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0">
                   <img
-                    src={`http://localhost:8080${item.image}`}
+                    src={item.image}
                     alt={item.name}
                     className="w-full h-full object-cover rounded-lg"
                   />

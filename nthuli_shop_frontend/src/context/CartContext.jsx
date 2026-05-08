@@ -10,15 +10,25 @@ const STORAGE_KEY = 'nthuli_cart';
  * Transforms backend cart format to UI format
  * Preserves both CartItem ID and Product ID for different API operations
  */
-const transformBackendItem = (item) => ({
-  id: item.id, // CartItem ID for update operations
-  productId: item.productId, // Product ID for removal
-  name: item.productName,
-  price: parseFloat(item.unitPrice),
-  quantity: item.quantity,
-  image: item.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
-  category: 'General',
-});
+const transformBackendItem = (item) => {
+  const API_BASE_URL = 'http://localhost:8080';
+  
+  // Convert relative image URL to absolute URL
+  let imageUrl = item.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image';
+  if (imageUrl.startsWith('/')) {
+    imageUrl = `${API_BASE_URL}${imageUrl}`;
+  }
+  
+  return {
+    id: item.id, // CartItem ID for update operations
+    productId: item.productId, // Product ID for removal
+    name: item.productName,
+    price: parseFloat(item.unitPrice),
+    quantity: item.quantity,
+    image: imageUrl,
+    category: 'General',
+  };
+};
 
 export function CartProvider({ children }) {
   const { isAuthenticated, isLoading: authLoading } = useContext(AuthContext);
