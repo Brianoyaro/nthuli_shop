@@ -22,6 +22,8 @@ import org.nthuli_shop.nthuli_shop.payment.repository.PaymentRepository;
 import org.nthuli_shop.nthuli_shop.payment.util.MpesaUtil;
 import org.nthuli_shop.nthuli_shop.order.repository.OrderRepository;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
+import org.nthuli_shop.nthuli_shop.cart.repository.CartItemRepository;
+import org.nthuli_shop.nthuli_shop.cart.repository.CartRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,8 @@ public class MpesaService {
     private final MpesaConfig mpesaConfig;
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final OkHttpClient okHttpClient;
     private final ObjectMapper objectMapper;
 
@@ -262,6 +266,18 @@ public class MpesaService {
                 log.info("[MPESA_SERVICE] handleMpesaCallback - Payment SUCCESSFUL - OrderId: {}", 
                         payment.getOrder().getId());
                 payment.setPaymentStatus(PaymentStatus.COMPLETED);
+                
+                // Clear user's cart after successful payment
+                try {
+                    Long userId = payment.getUser().getId();
+                    var cart = cartRepository.findByUserId(userId);
+                    if (cart.isPresent()) {
+                        cartItemRepository.deleteByCartId(cart.get().getId());
+                        log.info("[MPESA_SERVICE] handleMpesaCallback - Cart cleared for user: {} after successful payment", userId);
+                    }
+                } catch (Exception e) {
+                    log.warn("[MPESA_SERVICE] handleMpesaCallback - Failed to clear cart after successful payment", e);
+                }
                 
                 // Extract callback metadata
                 if (stkCallback.getCallbackMetadata() != null && 

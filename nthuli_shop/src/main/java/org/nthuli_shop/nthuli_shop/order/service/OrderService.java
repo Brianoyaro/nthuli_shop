@@ -77,10 +77,7 @@ public class OrderService {
         
         final Order savedOrder = orderRepository.save(order);
         log.info("Order created successfully with ID: {} for user: {}", savedOrder.getId(), user.getId());
-        
-        // Clear user's cart after order creation
-        cartItemRepository.deleteByCartId(cart.getId());
-        log.info("Cart cleared for user: {}", user.getId());
+        log.info("Cart will be cleared after successful payment, not at order creation");
         
         return convertToDto(savedOrder);
     }
