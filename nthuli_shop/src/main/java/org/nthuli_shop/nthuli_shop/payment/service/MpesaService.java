@@ -280,8 +280,13 @@ public class MpesaService {
                         }
                     }
                 }
+            } else if (resultCode == 1032) {
+                // User cancelled the STK prompt
+                log.info("[MPESA_SERVICE] handleMpesaCallback - Payment CANCELLED BY USER - OrderId: {}, ResultCode: {}", 
+                        payment.getOrder().getId(), resultCode);
+                payment.setPaymentStatus(PaymentStatus.CANCELLED);
             } else {
-                // Payment failed
+                // Payment failed (other error codes)
                 log.warn("[MPESA_SERVICE] handleMpesaCallback - Payment FAILED - ResultCode: {}, Description: {}", 
                         resultCode, resultDesc);
                 payment.setPaymentStatus(PaymentStatus.FAILED);

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaSpinner, FaPhone, FaCreditCard, FaBuilding, FaCheckCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaSpinner, FaPhone, FaCreditCard, FaBuilding, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { useCart } from '../hooks/useCart';
 import { useToast } from '../context/ToastContext';
 import { paymentsAPI } from '../services/paymentsAPI';
@@ -21,7 +21,12 @@ export function PaymentMethod() {
   const [orderTotal, setOrderTotal] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentError, setPaymentError] = useState('');
+  const [paymentErrorType, setPaymentErrorType] = useState(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  
+  // Store polling references to allow cancellation
+  const pollIntervalRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   // Empty cart redirect
   if (cart.length === 0 && !orderPlaced) {
@@ -102,13 +107,13 @@ export function PaymentMethod() {
         showSuccess('M-Pesa prompt sent. Check your phone and enter your PIN.');
 
         // Poll for payment status
-        const pollInterval = setInterval(async () => {
+        pollIntervalRef.current = setInterval(async () => {
           try {
             const status = await paymentsAPI.getPaymentStatus(payId);
 
             if (status.paymentStatus === 'COMPLETED') {
-              clearInterval(pollInterval);
-              clearTimeout(timeout);
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
               // Clear cart
               try {
@@ -121,11 +126,19 @@ export function PaymentMethod() {
               setPaymentState('completed');
               clearCart();
               setOrderPlaced(true);
-            } else if (status.paymentStatus === 'FAILED' || status.paymentStatus === 'CANCELLED') {
-              clearInterval(pollInterval);
-              clearTimeout(timeout);
+            } else if (status.paymentStatus === 'CANCELLED') {
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
               setPaymentState(null);
-              setPaymentError(`Payment ${status.paymentStatus.toLowerCase()}.Please try again.`);
+              setPaymentErrorType('cancelled');
+              setPaymentError('You cancelled the M-Pesa payment prompt. Your order is still available for retry.');
+              setIsProcessing(false);
+            } else if (status.paymentStatus === 'FAILED') {
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              setPaymentState(null);
+              setPaymentErrorType('failed');
+              setPaymentError('Payment failed. Please check your M-Pesa balance and try again.');
               setIsProcessing(false);
             }
           } catch (err) {
@@ -133,10 +146,11 @@ export function PaymentMethod() {
           }
         }, 2000);
 
-        const timeout = setTimeout(() => {
-          clearInterval(pollInterval);
+        timeoutRef.current = setTimeout(() => {
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
           setPaymentState(null);
-          setPaymentError('Payment timeout. Please check your M-Pesa notifications.');
+          setPaymentErrorType('timeout');
+          setPaymentError('Payment timeout. Please check your M-Pesa notifications and try again.');
           setIsProcessing(false);
         }, 120000);
       } else {
@@ -145,9 +159,22 @@ export function PaymentMethod() {
       }
     } catch (err) {
       console.error('❌ Payment error:', err);
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setError(err.message || 'Payment failed. Please try again.');
       setIsProcessing(false);
     }
+  };
+
+  const handleCancelPayment = () => {
+    console.log('🛑 User cancelled payment polling');
+    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    setPaymentState(null);
+    setPaymentErrorType('user-cancelled');
+    setPaymentError('Payment cancelled. You can retry whenever you are ready.');
+    setIsProcessing(false);
   };
 
   // Success screen
@@ -207,16 +234,25 @@ export function PaymentMethod() {
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
               {paymentState === 'waiting' ? 'Preparing Payment...' : 'Waiting for Confirmation'}
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-8">
               {paymentState === 'waiting'
                 ? 'Setting up your M-Pesa payment...'
                 : 'Check your phone and enter your M-Pesa PIN'}
             </p>
-            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-8">
               <p className="text-sm text-amber-700 font-medium">
                 ⏳ This may take a few moments. Do not close this page.
               </p>
             </div>
+            {paymentState === 'checking' && (
+              <button
+                onClick={handleCancelPayment}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-all border-2 border-red-200"
+              >
+                <FaTimes className="w-4 h-4" />
+                Cancel Payment
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -225,18 +261,38 @@ export function PaymentMethod() {
 
   // Payment error screen
   if (paymentError) {
+    const isRecoverable = ['cancelled', 'user-cancelled', 'timeout'].includes(paymentErrorType);
+    const iconColor = paymentErrorType === 'failed' ? 'red' : 'amber';
+    const bgColor = paymentErrorType === 'failed' ? 'red' : 'amber';
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="mb-6 inline-block p-4 bg-red-50 rounded-full">
-              <FaSpinner className="w-16 h-16 text-red-600" />
+            <div className={`mb-6 inline-block p-4 bg-${bgColor}-50 rounded-full`}>
+              <FaSpinner className={`w-16 h-16 text-${iconColor}-600`} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Payment Failed</h2>
-            <p className="text-gray-600 mb-6">{paymentError}</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              {paymentErrorType === 'cancelled' && 'Payment Cancelled by M-Pesa'}
+              {paymentErrorType === 'user-cancelled' && 'Payment Cancelled'}
+              {paymentErrorType === 'failed' && 'Payment Failed'}
+              {paymentErrorType === 'timeout' && 'Payment Timeout'}
+              {!paymentErrorType && 'Payment Failed'}
+            </h2>
+            <p className="text-gray-600 mb-8 leading-relaxed">{paymentError}</p>
+            
+            {isRecoverable && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-8 text-left">
+                <p className="text-blue-700 text-sm font-medium">
+                  💡 <strong>Tip:</strong> Your order has been saved. You can retry the payment with the same details whenever you're ready.
+                </p>
+              </div>
+            )}
+            
             <button
               onClick={() => {
                 setPaymentError('');
+                setPaymentErrorType(null);
                 setIsProcessing(false);
               }}
               className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:shadow-lg transition-all"
