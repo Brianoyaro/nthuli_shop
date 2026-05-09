@@ -20,6 +20,8 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
+import { Orders } from './pages/Orders';
+import { Profile } from './pages/Profile';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +79,22 @@ function App() {
                   />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route
+                    path="/orders"
+                    element={
+                      <ProtectedRoute>
+                        <Orders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
               </main>
               <Footer />
