@@ -18,6 +18,8 @@ import { Contact } from './pages/Contact';
 import { SearchResults } from './pages/SearchResults';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +49,8 @@ function App() {
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password/:token" element={<ResetPassword />} />
                   <Route
                     path="/order-review"
                     element={

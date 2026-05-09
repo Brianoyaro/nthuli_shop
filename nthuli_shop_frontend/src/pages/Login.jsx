@@ -89,10 +89,18 @@ export function Login() {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              <FaLock className="inline w-4 h-4 mr-2" />
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <FaLock className="inline w-4 h-4 mr-2" />
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Forgot?
+              </Link>
+            </div>
             <input
               {...register('password')}
               type="password"

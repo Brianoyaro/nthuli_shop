@@ -56,6 +56,9 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/health",
                                 "/api/auth/refresh-token",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password/**",
+                                "/api/auth/reset-password/validate/**",
                                 "/uploads/**",
                                 "/api/category",          // GET all categories
                                 "/api/category/{id}",     // GET category by ID
