@@ -40,9 +40,13 @@ export function Login() {
 
       if (result.success) {
         console.log('✅ Login successful, redirecting...');
-        // Redirect to the page they came from, or checkout/home
+        // Get redirect URL from query params or location state, default to home
+        const searchParams = new URLSearchParams(location.search);
+        const nextUrl = searchParams.get('next');
         const from = location.state?.from?.pathname;
-        navigate(from || '/checkout', { replace: true });
+        
+        const redirectUrl = nextUrl || from || '/';
+        navigate(redirectUrl, { replace: true });
       } else {
         setError(result.error || 'Login failed');
       }
