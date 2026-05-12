@@ -53,33 +53,22 @@ export function PaymentMethod() {
       setError('');
       setIsProcessing(true);
 
-      // Retrieve checkout data from sessionStorage
-      const checkoutDataStr = sessionStorage.getItem('checkoutData');
-      if (!checkoutDataStr) {
-        throw new Error('Checkout data not found. Please start checkout again.');
+      // Retrieve the order that was already created during checkout
+      const pendingOrderIdStr = sessionStorage.getItem('pendingOrderId');
+      if (!pendingOrderIdStr) {
+        throw new Error('No pending order found. Please go back and complete checkout again.');
       }
 
-      const checkoutData = JSON.parse(checkoutDataStr);
+      const newOrderId = parseInt(pendingOrderIdStr, 10);
 
-      // Step 1: Create order
-      console.log('📤 Creating order from cart...');
-      const orderResponse = await orderAPI.createOrderFromCart({
-        shippingAddress: checkoutData.shippingAddress,
-        notes: checkoutData.notes,
-        description: `Order from Nthuli Shop - ${selectedMethod.toUpperCase()}`,
-      });
-
-      if (!orderResponse.id) {
-        throw new Error('Order creation failed');
-      }
-
-      const newOrderId = orderResponse.id;
-      const orderAmount = orderResponse.totalAmount || getCartTotal();
+      // Fetch the actual order total from the stored order
+      const orderResponse = await orderAPI.getOrder(newOrderId);
+      const orderAmount = orderResponse?.totalAmount || getCartTotal();
 
       setOrderId(newOrderId);
       setOrderTotal(orderAmount);
 
-      console.log('✅ Order created:', { newOrderId, orderAmount });
+      console.log('✅ Using existing order:', { newOrderId, orderAmount });
 
       // Step 2: Handle payment based on method
       if (selectedMethod === 'mpesa') {
@@ -121,6 +110,10 @@ export function PaymentMethod() {
               } catch (clearErr) {
                 console.warn('⚠️ Cart clear failed:', clearErr);
               }
+
+              // Clear checkout session data
+              sessionStorage.removeItem('pendingOrderId');
+              sessionStorage.removeItem('checkoutData');
 
               showSuccess('Payment successful! Your order is confirmed.');
               setPaymentState('completed');

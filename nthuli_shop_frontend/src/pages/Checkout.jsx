@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { FaArrowLeft, FaSpinner, FaMapMarkerAlt, FaFileAlt, FaCheckCircle, FaShoppingCart, FaExclamationTriangle } from 'react-icons/fa';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
+import { orderAPI } from '../services/orderAPI';
 
 // Validation schema - only shipping address and notes
 const checkoutSchema = z.object({
@@ -63,18 +64,50 @@ export function Checkout() {
       setError('');
       setIsProcessing(true);
 
-      // Store shipping details in sessionStorage for the payment page
+      // Check if there's already a pending order for this exact checkout
+      // (user came back via browser back button without changing cart)
+      const existingOrderId = sessionStorage.getItem('pendingOrderId');
+      const existingCheckout = sessionStorage.getItem('checkoutData');
+
+      let orderId;
+
+      if (existingOrderId && existingCheckout) {
+        const prev = JSON.parse(existingCheckout);
+        // Reuse the pending order only if shipping address hasn't changed
+        if (prev.shippingAddress === data.shippingAddress) {
+          console.log('♻️ Reusing existing pending order:', existingOrderId);
+          orderId = existingOrderId;
+        }
+      }
+
+      if (!orderId) {
+        // Create a fresh order from the cart
+        console.log('📤 Creating order from cart...');
+        const orderResponse = await orderAPI.createOrderFromCart({
+          shippingAddress: data.shippingAddress,
+          notes: data.notes,
+          description: 'Order from Nthuli Shop',
+        });
+
+        if (!orderResponse?.id) {
+          throw new Error('Order creation failed. Please try again.');
+        }
+
+        orderId = orderResponse.id;
+        console.log('✅ Order created:', orderId);
+      }
+
+      // Store checkout data and the order ID for the payment page
       sessionStorage.setItem('checkoutData', JSON.stringify({
         shippingAddress: data.shippingAddress,
         notes: data.notes,
       }));
+      sessionStorage.setItem('pendingOrderId', String(orderId));
 
-      // Navigate to payment method selection
       navigate('/checkout/payment');
     } catch (err) {
       console.error('❌ Checkout error:', err);
-      const errorMessage = err.message || 'An error occurred. Please try again.';
-      setError(errorMessage);
+      setError(err.message || 'An error occurred. Please try again.');
       setIsProcessing(false);
     }
   };

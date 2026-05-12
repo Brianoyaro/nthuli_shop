@@ -1,5 +1,6 @@
 import { createContext, useState, useCallback, useEffect, useContext } from 'react';
 import { cartAPI } from '../services/cartAPI';
+import { orderAPI } from '../services/orderAPI';
 import { AuthContext } from './AuthContext';
 
 export const CartContext = createContext();
@@ -128,6 +129,27 @@ export function CartProvider({ children }) {
   }, []);
 
   /**
+   * Cancel any pending order and clear checkout session data.
+   * Called whenever the cart is mutated so a stale pending order
+   * is not reused on the next checkout attempt.
+   */
+  const clearPendingOrder = useCallback(async () => {
+    const pendingOrderId = sessionStorage.getItem('pendingOrderId');
+    if (!pendingOrderId) return;
+
+    sessionStorage.removeItem('pendingOrderId');
+    sessionStorage.removeItem('checkoutData');
+    console.log('🗑️ Cancelled stale pending order:', pendingOrderId);
+
+    try {
+      await orderAPI.cancelOrder(parseInt(pendingOrderId, 10));
+    } catch (err) {
+      // Non-fatal — order may already be cancelled or paid
+      console.warn('⚠️ Could not cancel pending order on backend:', err.message);
+    }
+  }, []);
+
+  /**
    * Add product to cart
    */
   const addToCart = useCallback(
@@ -135,6 +157,7 @@ export function CartProvider({ children }) {
       try {
         setLoading(true);
         console.log('➕ Adding to cart:', product.name);
+        await clearPendingOrder();
 
         if (isAuthenticated) {
           // Call backend
@@ -185,7 +208,7 @@ export function CartProvider({ children }) {
         setLoading(false);
       }
     },
-    [cart, isAuthenticated, saveToLocalStorage]
+    [cart, isAuthenticated, saveToLocalStorage, clearPendingOrder]
   );
 
   /**
@@ -196,6 +219,7 @@ export function CartProvider({ children }) {
       try {
         setLoading(true);
         console.log('🗑️ Removing from cart:', cartItemId);
+        await clearPendingOrder();
 
         if (isAuthenticated) {
           // Find the item to get its product ID
@@ -223,7 +247,7 @@ export function CartProvider({ children }) {
         setLoading(false);
       }
     },
-    [cart, isAuthenticated, saveToLocalStorage]
+    [cart, isAuthenticated, saveToLocalStorage, clearPendingOrder]
   );
 
   /**
@@ -239,6 +263,7 @@ export function CartProvider({ children }) {
 
         setLoading(true);
         console.log('✏️ Updating quantity:', { cartItemId, quantity });
+        await clearPendingOrder();
 
         if (isAuthenticated) {
           // Call backend with CartItem ID (not product ID)
@@ -264,7 +289,7 @@ export function CartProvider({ children }) {
         setLoading(false);
       }
     },
-    [cart, isAuthenticated, removeFromCart, saveToLocalStorage]
+    [cart, isAuthenticated, removeFromCart, saveToLocalStorage, clearPendingOrder]
   );
 
   /**
@@ -274,6 +299,7 @@ export function CartProvider({ children }) {
     try {
       setLoading(true);
       console.log('🧹 Clearing cart');
+      await clearPendingOrder();
 
       if (isAuthenticated) {
         // Remove all items from backend using product ID
@@ -295,7 +321,7 @@ export function CartProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [cart, isAuthenticated, saveToLocalStorage]);
+  }, [cart, isAuthenticated, saveToLocalStorage, clearPendingOrder]);
 
   /**
    * Get cart total
