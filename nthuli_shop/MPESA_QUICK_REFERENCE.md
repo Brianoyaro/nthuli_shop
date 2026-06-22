@@ -35,7 +35,7 @@ curl -X POST http://localhost:8080/api/payments/mpesa/stk-push \
     "description": "Payment for Order"
   }'
 
-# 3. Check payment status
+# 3. Check paymentPayment status
 curl -X GET http://localhost:8080/api/payments/user/all \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
@@ -44,16 +44,16 @@ curl -X GET http://localhost:8080/api/payments/user/all \
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| POST | `/api/payments/mpesa/stk-push` | Yes | Initiate payment |
+| POST | `/api/payments/mpesa/stk-push` | Yes | Initiate paymentPayment |
 | POST | `/api/payments/mpesa/callback` | No | M-Pesa callback |
-| GET | `/api/payments/{paymentId}` | Yes | Get payment |
-| GET | `/api/payments/order/{orderId}` | Yes | Get order payment |
+| GET | `/api/payments/{paymentId}` | Yes | Get paymentPayment |
+| GET | `/api/payments/order/{orderId}` | Yes | Get order paymentPayment |
 | GET | `/api/payments/user/all` | Yes | All payments |
 | GET | `/api/payments/user/completed` | Yes | Completed payments |
 
 ## File Structure
 ```
-payment/
+paymentPayment/
 ├── config/           # Configuration classes
 ├── controller/       # REST endpoints
 ├── dto/              # Request/Response DTOs
@@ -100,7 +100,7 @@ PENDING → COMPLETED (successful)
 | `Failed to get access token` | Check Consumer Key/Secret |
 | `Invalid phone number format` | Ensure valid phone number |
 | `STK not appearing` | Verify callback URL configured |
-| `Payment not found` | Check if payment was saved to database |
+| `Payment not found` | Check if paymentPayment was saved to database |
 
 ## Database Queries
 
@@ -117,7 +117,7 @@ SELECT * FROM payments WHERE payment_status = 'PENDING';
 -- Get completed payments
 SELECT * FROM payments WHERE payment_status = 'COMPLETED';
 
--- Get payment by transaction ID
+-- Get paymentPayment by transaction ID
 SELECT * FROM payments WHERE transaction_id = 'ws_CO_DMZ_123456789';
 ```
 
@@ -137,7 +137,7 @@ SELECT * FROM payments WHERE transaction_id = 'ws_CO_DMZ_123456789';
 - [ ] Integrate with order management
 - [ ] Send confirmation emails
 - [ ] Implement refund logic
-- [ ] Add payment dashboard
+- [ ] Add paymentPayment dashboard
 - [ ] Set up alerts for failed payments
 - [ ] Implement reconciliation
 - [ ] Add admin management UI

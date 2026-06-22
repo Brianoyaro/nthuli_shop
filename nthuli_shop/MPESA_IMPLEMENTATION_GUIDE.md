@@ -2,13 +2,13 @@
 
 ## Overview
 
-This implementation provides a complete M-Pesa STK Push payment integration for the Nthuli Shop e-commerce platform. STK Push is a Safaricom Daraja API that enables merchants to initiate payment prompts on customer phones without requiring the customer to enter payment details manually.
+This implementation provides a complete M-Pesa STK Push paymentPayment integration for the Nthuli Shop e-commerce platform. STK Push is a Safaricom Daraja API that enables merchants to initiate paymentPayment prompts on customer phones without requiring the customer to enter paymentPayment details manually.
 
 ## Features
 
-- **STK Push Initiation**: Initiate payment prompts directly on customer phones
-- **Automatic Callback Handling**: Process payment confirmations from M-Pesa
-- **Payment Tracking**: Track payment status and transaction history
+- **STK Push Initiation**: Initiate paymentPayment prompts directly on customer phones
+- **Automatic Callback Handling**: Process paymentPayment confirmations from M-Pesa
+- **Payment Tracking**: Track paymentPayment status and transaction history
 - **Phone Number Validation**: Automatic phone number sanitization and formatting
 - **Secure Authentication**: Uses OAuth 2.0 for API authentication
 - **Error Handling**: Comprehensive error handling and logging
@@ -16,7 +16,7 @@ This implementation provides a complete M-Pesa STK Push payment integration for 
 ## Project Structure
 
 ```
-payment/
+paymentPayment/
 ├── config/
 │   ├── MpesaConfig.java          # M-Pesa configuration properties
 │   └── PaymentConfiguration.java   # Bean configurations (RestTemplate, ObjectMapper)
@@ -142,7 +142,7 @@ The following dependencies have been added:
 
 **Authentication:** None (M-Pesa Server)
 
-M-Pesa will POST payment status to this endpoint automatically.
+M-Pesa will POST paymentPayment status to this endpoint automatically.
 
 ### 3. Get Payment by ID
 
@@ -189,8 +189,8 @@ M-Pesa will POST payment status to this endpoint automatically.
   "success": true,
   "message": "User payments retrieved successfully",
   "data": [
-    { /* payment 1 */ },
-    { /* payment 2 */ }
+    { /* paymentPayment 1 */ },
+    { /* paymentPayment 2 */ }
   ]
 }
 ```
@@ -237,7 +237,7 @@ Use the following test phone number for M-Pesa Sandbox:
      "orderId": 1,
      "phoneNumber": "254708374149",
      "amount": 1000,
-     "description": "Test payment"
+     "description": "Test paymentPayment"
    }
    ```
 
@@ -302,9 +302,9 @@ For production, configure your callback URL in the M-Pesa Daraja portal:
 - [ ] M-Pesa Online (WebCheckout) support
 - [ ] Refund processing
 - [ ] Payment confirmation emails
-- [ ] Admin dashboard for payment management
+- [ ] Admin dashboard for paymentPayment management
 - [ ] Recurring/subscription payments
-- [ ] Multiple payment method aggregation
+- [ ] Multiple paymentPayment method aggregation
 - [ ] Transaction reconciliation reports
 
 ## Troubleshooting

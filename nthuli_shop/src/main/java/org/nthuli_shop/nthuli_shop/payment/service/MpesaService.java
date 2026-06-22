@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Credentials;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -15,17 +14,16 @@ import org.nthuli_shop.nthuli_shop.payment.config.MpesaConfig;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaCallbackResponse;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushRequest;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushResponse;
-import org.nthuli_shop.nthuli_shop.payment.entity.Payment;
+import org.nthuli_shop.nthuli_shop.payment.entity.Payment_Payment;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentMethod;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentStatus;
-import org.nthuli_shop.nthuli_shop.payment.repository.PaymentRepository;
+import org.nthuli_shop.nthuli_shop.payment.repository.Payment_PaymentRepository;
 import org.nthuli_shop.nthuli_shop.payment.util.MpesaUtil;
 import org.nthuli_shop.nthuli_shop.order.repository.OrderRepository;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartItemRepository;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartRepository;
 import org.nthuli_shop.nthuli_shop.Authentication.service.EmailService;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -39,7 +37,7 @@ import java.util.Map;
 public class MpesaService {
 
     private final MpesaConfig mpesaConfig;
-    private final PaymentRepository paymentRepository;
+    private final Payment_PaymentRepository paymentPaymentRepository;
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
@@ -191,7 +189,7 @@ public class MpesaService {
                         merchantRequestId, checkoutRequestId);
 
                 // Save payment record with authenticated user
-                Payment payment = Payment.builder()
+                Payment_Payment paymentPayment = org.nthuli_shop.nthuli_shop.payment.entity.Payment_Payment.builder()
                         .user(user)
                         .order(order)
                         .amount(request.getAmount())
@@ -203,9 +201,9 @@ public class MpesaService {
                         .build();
                 
                 log.debug("[MPESA_SERVICE] initiateStkPush - Saving payment record to database");
-                paymentRepository.save(payment);
+                paymentPaymentRepository.save(paymentPayment);
                 log.info("[MPESA_SERVICE] initiateStkPush SUCCESS - Payment saved with ID: {}, Status: PENDING", 
-                        payment.getId());
+                        paymentPayment.getId());
 
                 return MpesaStkPushResponse.builder()
                         .merchantRequestId(merchantRequestId)
@@ -251,27 +249,27 @@ public class MpesaService {
                     checkoutRequestId, resultCode, resultDesc);
 
             // Find payment by transaction ID
-            Payment payment = paymentRepository.findByTransactionId(checkoutRequestId)
+            Payment_Payment paymentPayment = paymentPaymentRepository.findByTransactionId(checkoutRequestId)
                     .orElse(null);
 
-            if (payment == null) {
+            if (paymentPayment == null) {
                 log.error("[MPESA_SERVICE] handleMpesaCallback ERROR - Payment not found for checkoutRequestId: {}", 
                         checkoutRequestId);
                 return;
             }
 
             log.debug("[MPESA_SERVICE] handleMpesaCallback - Payment found - PaymentId: {}, OrderId: {}", 
-                    payment.getId(), payment.getOrder().getId());
+                    paymentPayment.getId(), paymentPayment.getOrder().getId());
 
             if (resultCode == 0) {
                 // Payment successful
                 log.info("[MPESA_SERVICE] handleMpesaCallback - Payment SUCCESSFUL - OrderId: {}", 
-                        payment.getOrder().getId());
-                payment.setPaymentStatus(PaymentStatus.COMPLETED);
+                        paymentPayment.getOrder().getId());
+                paymentPayment.setPaymentStatus(PaymentStatus.COMPLETED);
                 
                 // Clear user's cart after successful payment
                 try {
-                    Long userId = payment.getUser().getId();
+                    Long userId = paymentPayment.getUser().getId();
                     var cart = cartRepository.findByUserId(userId);
                     if (cart.isPresent()) {
                         cartItemRepository.deleteByCartId(cart.get().getId());
@@ -293,7 +291,7 @@ public class MpesaService {
                         log.debug("[MPESA_SERVICE] handleMpesaCallback - Item: {}", item.getName());
                         if ("MpesaReceiptNumber".equals(item.getName())) {
                             String receipt = item.getValue().toString();
-                            payment.setMpesaReference(receipt);
+                            paymentPayment.setMpesaReference(receipt);
                             log.info("[MPESA_SERVICE] handleMpesaCallback - M-Pesa Receipt: {}", receipt);
                         }
                     }
@@ -301,27 +299,27 @@ public class MpesaService {
             } else if (resultCode == 1032) {
                 // User cancelled the STK prompt
                 log.info("[MPESA_SERVICE] handleMpesaCallback - Payment CANCELLED BY USER - OrderId: {}, ResultCode: {}", 
-                        payment.getOrder().getId(), resultCode);
-                payment.setPaymentStatus(PaymentStatus.CANCELLED);
+                        paymentPayment.getOrder().getId(), resultCode);
+                paymentPayment.setPaymentStatus(PaymentStatus.CANCELLED);
             } else {
                 // Payment failed (other error codes)
                 log.warn("[MPESA_SERVICE] handleMpesaCallback - Payment FAILED - ResultCode: {}, Description: {}", 
                         resultCode, resultDesc);
-                payment.setPaymentStatus(PaymentStatus.FAILED);
+                paymentPayment.setPaymentStatus(PaymentStatus.FAILED);
             }
 
             log.debug("[MPESA_SERVICE] handleMpesaCallback - Saving updated payment status to database");
-            paymentRepository.save(payment);
+            paymentPaymentRepository.save(paymentPayment);
             log.info("[MPESA_SERVICE] handleMpesaCallback SUCCESS - Payment status updated to: {}", 
-                    payment.getPaymentStatus());
+                    paymentPayment.getPaymentStatus());
 
             // Notify admin on successful payment (non-fatal)
-            if (payment.getPaymentStatus() == PaymentStatus.COMPLETED) {
+            if (paymentPayment.getPaymentStatus() == PaymentStatus.COMPLETED) {
                 try {
-                    emailService.sendAdminOrderNotification(payment.getOrder(), payment);
+                    emailService.sendAdminOrderNotification(paymentPayment.getOrder(), paymentPayment);
                 } catch (Exception emailEx) {
                     log.warn("[MPESA_SERVICE] handleMpesaCallback - Admin notification failed for order #{}", 
-                            payment.getOrder().getId(), emailEx);
+                            paymentPayment.getOrder().getId(), emailEx);
                 }
             }
 
@@ -333,45 +331,45 @@ public class MpesaService {
     /**
      * Get payment details by ID
      */
-    public Payment getPaymentById(Long paymentId) {
+    public Payment_Payment getPaymentById(Long paymentId) {
         log.info("[MPESA_SERVICE] getPaymentById - PaymentId: {}", paymentId);
-        return paymentRepository.findById(paymentId)
+        return paymentPaymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
     }
 
     /**
      * Get payment by order ID
      */
-    public Payment getPaymentByOrderId(Long orderId) {
+    public Payment_Payment getPaymentByOrderId(Long orderId) {
         log.info("[MPESA_SERVICE] getPaymentByOrderId - OrderId: {}", orderId);
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
-        return paymentRepository.findByOrder(order)
+        return paymentPaymentRepository.findByOrder(order)
                 .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
     }
 
     /**
      * Get payment by checkoutRequestId (stored as transactionId)
      */
-    public Payment getPaymentByCheckoutRequestId(String checkoutRequestId) {
+    public Payment_Payment getPaymentByCheckoutRequestId(String checkoutRequestId) {
         log.info("[MPESA_SERVICE] getPaymentByCheckoutRequestId - CheckoutRequestId: {}", checkoutRequestId);
-        return paymentRepository.findByTransactionId(checkoutRequestId)
+        return paymentPaymentRepository.findByTransactionId(checkoutRequestId)
                 .orElseThrow(() -> new RuntimeException("Payment not found with checkoutRequestId: " + checkoutRequestId));
     }
 
     /**
      * Get all payments for a user
      */
-    public List<Payment> getUserPayments(Long userId) {
+    public List<Payment_Payment> getUserPayments(Long userId) {
         log.info("[MPESA_SERVICE] getUserPayments - UserId: {}", userId);
-        return paymentRepository.findByUserId(userId);
+        return paymentPaymentRepository.findByUserId(userId);
     }
 
     /**
      * Get completed payments for a user
      */
-    public List<Payment> getUserCompletedPayments(Long userId) {
+    public List<Payment_Payment> getUserCompletedPayments(Long userId) {
         log.info("[MPESA_SERVICE] getUserCompletedPayments - UserId: {}", userId);
-        return paymentRepository.findByUserIdAndPaymentStatus(userId, PaymentStatus.COMPLETED);
+        return paymentPaymentRepository.findByUserIdAndPaymentStatus(userId, PaymentStatus.COMPLETED);
     }
 }

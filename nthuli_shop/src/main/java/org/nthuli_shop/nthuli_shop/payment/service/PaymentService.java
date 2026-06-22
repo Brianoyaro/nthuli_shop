@@ -6,8 +6,8 @@ import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushRequest;
 import org.nthuli_shop.nthuli_shop.payment.dto.MpesaStkPushResponse;
 import org.nthuli_shop.nthuli_shop.payment.dto.PaymentResponseDto;
-import org.nthuli_shop.nthuli_shop.payment.entity.Payment;
-import org.nthuli_shop.nthuli_shop.payment.repository.PaymentRepository;
+import org.nthuli_shop.nthuli_shop.payment.entity.Payment_Payment;
+import org.nthuli_shop.nthuli_shop.payment.repository.Payment_PaymentRepository;
 import org.nthuli_shop.nthuli_shop.payment.enums.PaymentStatus;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class PaymentService {
 
     private final MpesaService mpesaService;
-    private final PaymentRepository paymentRepository;
+    private final Payment_PaymentRepository paymentPaymentRepository;
 
     /**
      * Initiate M-Pesa STK Push payment for authenticated user
@@ -46,8 +46,8 @@ public class PaymentService {
     public PaymentResponseDto getPaymentById(Long paymentId) {
         log.info("[PAYMENT_SERVICE] getPaymentById START - PaymentId: {}", paymentId);
         try {
-            Payment payment = mpesaService.getPaymentById(paymentId);
-            PaymentResponseDto dto = convertToDto(payment);
+            Payment_Payment paymentPayment = mpesaService.getPaymentById(paymentId);
+            PaymentResponseDto dto = convertToDto(paymentPayment);
             log.info("[PAYMENT_SERVICE] getPaymentById SUCCESS - Status: {}", dto.getPaymentStatus());
             return dto;
         } catch (Exception e) {
@@ -62,8 +62,8 @@ public class PaymentService {
     public PaymentResponseDto getPaymentByOrderId(Long orderId) {
         log.info("[PAYMENT_SERVICE] getPaymentByOrderId START - OrderId: {}", orderId);
         try {
-            Payment payment = mpesaService.getPaymentByOrderId(orderId);
-            PaymentResponseDto dto = convertToDto(payment);
+            Payment_Payment paymentPayment = mpesaService.getPaymentByOrderId(orderId);
+            PaymentResponseDto dto = convertToDto(paymentPayment);
             log.info("[PAYMENT_SERVICE] getPaymentByOrderId SUCCESS - PaymentId: {}, Status: {}", 
                     dto.getId(), dto.getPaymentStatus());
             return dto;
@@ -79,7 +79,7 @@ public class PaymentService {
     public List<PaymentResponseDto> getUserPayments(User user) {
         log.info("[PAYMENT_SERVICE] getUserPayments START - UserId: {}", user.getId());
         try {
-            List<PaymentResponseDto> payments = paymentRepository.findByUser(user)
+            List<PaymentResponseDto> payments = paymentPaymentRepository.findByUser(user)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class PaymentService {
     public List<PaymentResponseDto> getUserCompletedPayments(User user) {
         log.info("[PAYMENT_SERVICE] getUserCompletedPayments START - UserId: {}", user.getId());
         try {
-            List<PaymentResponseDto> payments = paymentRepository.findByUserAndPaymentStatus(user, PaymentStatus.COMPLETED)
+            List<PaymentResponseDto> payments = paymentPaymentRepository.findByUserAndPaymentStatus(user, PaymentStatus.COMPLETED)
                     .stream()
                     .map(this::convertToDto)
                     .collect(Collectors.toList());
@@ -116,8 +116,8 @@ public class PaymentService {
     public PaymentResponseDto getPaymentByCheckoutRequestId(String checkoutRequestId) {
         log.info("[PAYMENT_SERVICE] getPaymentByCheckoutRequestId START - CheckoutRequestId: {}", checkoutRequestId);
         try {
-            Payment payment = mpesaService.getPaymentByCheckoutRequestId(checkoutRequestId);
-            PaymentResponseDto dto = convertToDto(payment);
+            Payment_Payment paymentPayment = mpesaService.getPaymentByCheckoutRequestId(checkoutRequestId);
+            PaymentResponseDto dto = convertToDto(paymentPayment);
             log.info("[PAYMENT_SERVICE] getPaymentByCheckoutRequestId SUCCESS - PaymentId: {}, Status: {}", 
                     dto.getId(), dto.getPaymentStatus());
             return dto;
@@ -130,25 +130,25 @@ public class PaymentService {
     /**
      * Convert Payment entity to DTO
      */
-    private PaymentResponseDto convertToDto(Payment payment) {
+    private PaymentResponseDto convertToDto(Payment_Payment paymentPayment) {
         log.debug("[PAYMENT_SERVICE] Converting Payment to DTO - PaymentId: {}, Status: {}", 
-                payment.getId(), payment.getPaymentStatus());
+                paymentPayment.getId(), paymentPayment.getPaymentStatus());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         
         return PaymentResponseDto.builder()
-                .id(payment.getId())
-                .orderId(payment.getOrder() != null ? payment.getOrder().getId() : null)
-                .userId(payment.getUser() != null ? payment.getUser().getId() : null)
-                .email(payment.getUser() != null ? payment.getUser().getEmail() : null)
-                .amount(payment.getAmount())
-                .paymentMethod(payment.getPaymentMethod().toString())
-                .paymentStatus(payment.getPaymentStatus().toString())
-                .transactionId(payment.getTransactionId())
-                .description(payment.getDescription())
-                .createdAt(payment.getCreatedAt() != null ? 
-                        payment.getCreatedAt().format(formatter) : null)
-                .updatedAt(payment.getUpdatedAt() != null ? 
-                        payment.getUpdatedAt().format(formatter) : null)
+                .id(paymentPayment.getId())
+                .orderId(paymentPayment.getOrder() != null ? paymentPayment.getOrder().getId() : null)
+                .userId(paymentPayment.getUser() != null ? paymentPayment.getUser().getId() : null)
+                .email(paymentPayment.getUser() != null ? paymentPayment.getUser().getEmail() : null)
+                .amount(paymentPayment.getAmount())
+                .paymentMethod(paymentPayment.getPaymentMethod().toString())
+                .paymentStatus(paymentPayment.getPaymentStatus().toString())
+                .transactionId(paymentPayment.getTransactionId())
+                .description(paymentPayment.getDescription())
+                .createdAt(paymentPayment.getCreatedAt() != null ?
+                        paymentPayment.getCreatedAt().format(formatter) : null)
+                .updatedAt(paymentPayment.getUpdatedAt() != null ?
+                        paymentPayment.getUpdatedAt().format(formatter) : null)
                 .build();
     }
 }

@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS payments (
 ## Callback Issues
 
 ### Issue: Callback Not Received
-**Symptoms**: Payment status stays PENDING after successful payment
+**Symptoms**: Payment status stays PENDING after successful paymentPayment
 
 **Solutions**:
 1. Verify callback URL is correct in Daraja portal:
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS payments (
 6. Test callback manually with Postman
 
 ### Issue: Callback Processing Fails
-**Symptoms**: Callback received but payment status not updated
+**Symptoms**: Callback received but paymentPayment status not updated
 
 **Solutions**:
 1. Check server logs for exceptions
@@ -183,7 +183,7 @@ log.info("Principal type: {}", authentication.getPrincipal().getClass());
 1. Check for duplicate endpoints
 2. Add idempotency key handling
 3. Verify unique constraint on `transaction_id`
-4. Implement transaction ID validation before creating payment
+4. Implement transaction ID validation before creating paymentPayment
 5. Add database constraint:
 ```sql
 ALTER TABLE payments ADD UNIQUE KEY unique_transaction_id (transaction_id);
@@ -234,7 +234,7 @@ CREATE INDEX idx_payment_status ON payments(payment_status);
 ### Enable Debug Logging
 Add to `application.properties`:
 ```properties
-logging.level.org.nthuli_shop.nthuli_shop.payment=DEBUG
+logging.level.org.nthuli_shop.nthuli_shop.paymentPayment=DEBUG
 logging.level.org.springframework.web=DEBUG
 logging.level.org.springframework.security=DEBUG
 ```

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSpinner, FaPhone, FaCreditCard, FaBuilding, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
 import { paymentsAPI } from '../services/paymentsAPI';
 import { orderAPI } from '../services/orderAPI';
@@ -11,6 +12,7 @@ export function PaymentMethod() {
   const navigate = useNavigate();
   const { cart, clearCart, getCartTotal } = useCart();
   const { success: showSuccess } = useToast();
+  const { user } = useAuth();
   
   const [selectedMethod, setSelectedMethod] = useState('mpesa');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -146,6 +148,35 @@ export function PaymentMethod() {
           setPaymentError('Payment timeout. Please check your M-Pesa notifications and try again.');
           setIsProcessing(false);
         }, 120000);
+      } else if (selectedMethod === 'paystack') {
+        // Paystack redirect flow
+        const email = (orderResponse?.email) || user?.email;
+        if (!email) {
+          throw new Error('No customer email available for Paystack payment');
+        }
+
+        setPaymentState('redirecting');
+        console.log('💳 Initiating Paystack transaction...');
+
+        const initResponse = await paymentsAPI.initPaystackTransaction(newOrderId, email);
+
+        // Try multiple possible shapes for the authorization URL
+        const authorizationUrl = initResponse?.authorizationUrl || initResponse?.authorization_url || initResponse?.data?.authorization_url || initResponse?.data?.authorizationUrl || initResponse?.authorizationURL;
+        const reference = initResponse?.reference || initResponse?.data?.reference;
+
+        if (!authorizationUrl) {
+          console.error('Paystack init response:', initResponse);
+          throw new Error('Failed to obtain Paystack authorization URL from server');
+        }
+
+        // Persist reference so backend can correlate after redirect (if needed)
+        if (reference) {
+          sessionStorage.setItem('pendingPaymentReference', reference);
+        }
+
+        // Redirect the browser to Paystack's hosted payment page
+        window.location.href = authorizationUrl;
+        return; // navigation away
       } else {
         // Other payment methods not yet implemented
         throw new Error(`${selectedMethod.toUpperCase()} payment not yet available`);
@@ -371,21 +402,38 @@ export function PaymentMethod() {
             )}
           </div>
 
-          {/* Card Option (Disabled for now) */}
-          <div className="mb-4 p-6 border-2 border-gray-200 rounded-xl opacity-50 cursor-not-allowed">
+          {/* Paystack Card Option (Redirect) */}
+          <div
+            onClick={() => setSelectedMethod('paystack')}
+            className={`mb-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${
+              selectedMethod === 'paystack'
+                ? 'border-blue-600 bg-blue-50'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+          >
             <div className="flex items-start gap-4">
-              <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                selectedMethod === 'paystack' ? 'border-blue-600 bg-blue-600' : 'border-gray-300'
+              }`}>
+                {selectedMethod === 'paystack' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+              </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <FaCreditCard className="w-5 h-5 text-gray-400" />
-                  <h3 className="font-bold text-gray-500">Debit/Credit Card</h3>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Coming Soon</span>
+                  <FaCreditCard className="w-5 h-5 text-indigo-600" />
+                  <h3 className={`font-bold ${selectedMethod === 'paystack' ? 'text-gray-900' : 'text-gray-700'}`}>
+                    Card (Paystack)
+                  </h3>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Visa, Mastercard, and other card payments
-                </p>
+                <p className="text-sm text-gray-600">Pay with card securely via Paystack (redirect)</p>
               </div>
             </div>
+
+            {selectedMethod === 'paystack' && (
+              <div className="mt-6 ml-10 text-sm text-gray-700">
+                <p>You'll be redirected to Paystack to complete payment.</p>
+                <p className="mt-2">Email: {user?.email || 'Not available'}</p>
+              </div>
+            )}
           </div>
 
           {/* Bank Option (Disabled for now) */}

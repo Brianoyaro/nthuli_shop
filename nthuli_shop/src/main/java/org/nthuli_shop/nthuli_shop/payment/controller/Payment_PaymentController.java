@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/api/payments/old")
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentController {
+public class Payment_PaymentController {
 
     private final PaymentService paymentService;
     private final MpesaService mpesaService;

@@ -41,7 +41,7 @@ public class PaystackService {
 
         payload.put("reference", reference);
 
-        payload.put("callback_url", "http://localhost:3000/payment/success");
+        payload.put("callback_url", "http://localhost:5173/");
 
         Map response =
                 webClient.post()

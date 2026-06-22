@@ -2,6 +2,7 @@ package org.nthuli_shop.nthuli_shop.paystack.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.cart.service.CartService;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.nthuli_shop.nthuli_shop.order.enums.OrderStatus;
@@ -21,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -30,6 +32,7 @@ public class PaymentController {
 
     @PostMapping
     public PaymentResponseDto pay(@RequestBody PaymentRequestDto request) {
+        log.info("Received request: {}", request);
         return paymentService.initiatePayment(request);
     }
 

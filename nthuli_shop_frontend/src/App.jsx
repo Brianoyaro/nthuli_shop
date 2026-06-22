@@ -22,6 +22,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { Orders } from './pages/Orders';
 import { Profile } from './pages/Profile';
+// import { PaymentSuccess } from './pages/PaymentSuccess';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ function App() {
                 <Navbar />
               <main className="flex-grow">
                 <Routes>
+                  {/* <Route path="/payment/success" element={<PaymentSuccess />} /> */}
                   <Route path="/" element={<Home />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/product/:id" element={<ProductDetail />} />

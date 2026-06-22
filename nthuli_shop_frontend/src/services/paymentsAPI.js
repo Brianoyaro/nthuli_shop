@@ -6,6 +6,7 @@ import apiClient from './api';
  */
 
 export const paymentsAPI = {
+
   /**
    * Initiate M-Pesa STK Push payment
    * @param {Object} paymentData - Payment data object
@@ -145,6 +146,51 @@ export const paymentsAPI = {
         error.response?.data?.message || 
         error.message || 
         'Failed to fetch payment history'
+      );
+    }
+  },
+
+  /**
+   * Initiate a Paystack transaction via the backend.
+   * Backend is expected to return an authorization URL and reference.
+   * @param {string|number} orderId - Order ID to attach to the payment
+   * @param {string} email - Customer email required by Paystack
+   * @returns {Promise<Object>} Initialization data (authorization URL, reference, etc.)
+   */
+  initPaystackTransaction: async (orderId, email) => {
+    try {
+      const response = await apiClient.post('/payments', {
+        orderId,
+        email,
+        paymentMethod: 'PAYSTACK',
+      });
+
+      const data = response.data.data || response.data;
+      console.log('💳 Paystack init response:', data);
+      return data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to initiate Paystack transaction'
+      );
+    }
+  },
+
+  /**
+   * Verify a Paystack transaction by reference via backend.
+   * @param {string} reference - Paystack transaction reference
+   * @returns {Promise<Object>} Verification result
+   */
+  verifyPaystackTransaction: async (reference) => {
+    try {
+      const response = await apiClient.get(`/payments/verify/${reference}`);
+      return response.data.data || response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to verify Paystack transaction'
       );
     }
   },

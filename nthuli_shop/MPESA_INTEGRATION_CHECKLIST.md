@@ -46,7 +46,7 @@
 - [ ] Get JWT token from auth endpoint
 - [ ] Test STK Push endpoint: `POST /api/payments/mpesa/stk-push`
 - [ ] Use test phone: `254708374149`
-- [ ] Verify payment record created in database
+- [ ] Verify paymentPayment record created in database
 - [ ] Test callback processing
 
 ## Step 7: Production Setup (When Ready)
@@ -55,8 +55,8 @@
 - [ ] Ensure HTTPS is enabled
 - [ ] Register production callback URL in Daraja portal
 - [ ] Test with production credentials
-- [ ] Set up payment confirmation emails
-- [ ] Implement admin dashboard for payment monitoring
+- [ ] Set up paymentPayment confirmation emails
+- [ ] Implement admin dashboard for paymentPayment monitoring
 
 ## Troubleshooting
 
@@ -95,7 +95,7 @@ mvn spring-boot:run
 - [ ] `/api/payments/mpesa/stk-push` endpoint accepts requests
 - [ ] STK popup appears on test phone within 10 seconds
 - [ ] Payment record created in database with PENDING status
-- [ ] Callback received and payment status updated to COMPLETED
+- [ ] Callback received and paymentPayment status updated to COMPLETED
 
 ## Support
 - **Daraja Portal**: https://developer.safaricom.co.ke

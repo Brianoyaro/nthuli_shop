@@ -1,6 +1,7 @@
 package org.nthuli_shop.nthuli_shop.paystack.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.nthuli_shop.nthuli_shop.order.repository.OrderRepository;
 import org.nthuli_shop.nthuli_shop.paystack.Dto.PaymentRequestDto;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -45,6 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
                 order.getTotalAmount(),   // ✅ SOURCE OF TRUTH
                 reference
         );
+        log.debug("after payment initialisation, the returned url:{}, reference: {}", url, reference);
         return PaymentResponseDto.builder()
                 .reference(reference)
                 .authorizationUrl(url)

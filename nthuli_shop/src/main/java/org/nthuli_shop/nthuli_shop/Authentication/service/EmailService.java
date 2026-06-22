@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.nthuli_shop.nthuli_shop.order.entity.OrderItem;
-import org.nthuli_shop.nthuli_shop.payment.entity.Payment;
+import org.nthuli_shop.nthuli_shop.payment.entity.Payment_Payment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -29,17 +29,17 @@ public class EmailService {
     private String adminEmail;
 
     /**
-     * Notify the admin when a customer's payment is confirmed.
+     * Notify the admin when a customer's paymentPayment is confirmed.
      * Non-fatal — exceptions are caught and logged only.
      */
-    public void sendAdminOrderNotification(Order order, Payment payment) {
+    public void sendAdminOrderNotification(Order order, Payment_Payment paymentPayment) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(adminEmail);
             helper.setFrom(fromEmail);
             helper.setSubject("New Order #" + order.getId() + " — Payment Confirmed | Nthuli Shop");
-            helper.setText(buildAdminOrderEmailHtml(order, payment), true);
+            helper.setText(buildAdminOrderEmailHtml(order, paymentPayment), true);
             mailSender.send(message);
             log.info("Admin order notification sent for order #{} to: {}", order.getId(), adminEmail);
         } catch (MessagingException e) {
@@ -47,13 +47,13 @@ public class EmailService {
         }
     }
 
-    private String buildAdminOrderEmailHtml(Order order, Payment payment) {
+    private String buildAdminOrderEmailHtml(Order order, Payment_Payment paymentPayment) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
         String createdAt = order.getCreatedAt() != null ? order.getCreatedAt().format(fmt) : "-";
         String customerEmail = order.getUser() != null ? order.getUser().getEmail() : "-";
         String shippingAddress = order.getShippingAddress() != null ? order.getShippingAddress() : "-";
         String notes = (order.getNotes() != null && !order.getNotes().isBlank()) ? order.getNotes() : "None";
-        String mpesaRef = payment.getMpesaReference() != null ? payment.getMpesaReference() : "-";
+        String mpesaRef = paymentPayment.getMpesaReference() != null ? paymentPayment.getMpesaReference() : "-";
 
         StringBuilder rows = new StringBuilder();
         for (OrderItem item : order.getOrderItems()) {
@@ -76,7 +76,7 @@ public class EmailService {
                   <span style="display:inline-block;background:#22c55e;color:white;padding:4px 14px;border-radius:99px;font-size:13px;margin-top:10px">&#x2705; Payment Confirmed</span>
                 </div>
                 <div style="padding:32px">
-                  <p style="margin:0 0 20px;color:#374151">A customer has placed a new order and payment has been confirmed via M-Pesa.</p>
+                  <p style="margin:0 0 20px;color:#374151">A customer has placed a new order and paymentPayment has been confirmed via M-Pesa.</p>
 
                   <h3 style="font-size:13px;text-transform:uppercase;color:#6b7280;letter-spacing:.05em;margin:0 0 8px">Order Details</h3>
                   <table style="width:100%;background:#f3f4f6;border-radius:8px;padding:0;border-collapse:collapse">
