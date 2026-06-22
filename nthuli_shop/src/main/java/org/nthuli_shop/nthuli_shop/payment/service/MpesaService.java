@@ -24,6 +24,7 @@ import org.nthuli_shop.nthuli_shop.order.repository.OrderRepository;
 import org.nthuli_shop.nthuli_shop.order.entity.Order;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartItemRepository;
 import org.nthuli_shop.nthuli_shop.cart.repository.CartRepository;
+import org.nthuli_shop.nthuli_shop.Authentication.service.EmailService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,7 @@ public class MpesaService {
     private final CartItemRepository cartItemRepository;
     private final OkHttpClient okHttpClient;
     private final ObjectMapper objectMapper;
+    private final EmailService emailService;
 
     /**
      * Get M-Pesa access token for API authentication using OkHttp
@@ -312,6 +314,16 @@ public class MpesaService {
             paymentRepository.save(payment);
             log.info("[MPESA_SERVICE] handleMpesaCallback SUCCESS - Payment status updated to: {}", 
                     payment.getPaymentStatus());
+
+            // Notify admin on successful payment (non-fatal)
+            if (payment.getPaymentStatus() == PaymentStatus.COMPLETED) {
+                try {
+                    emailService.sendAdminOrderNotification(payment.getOrder(), payment);
+                } catch (Exception emailEx) {
+                    log.warn("[MPESA_SERVICE] handleMpesaCallback - Admin notification failed for order #{}", 
+                            payment.getOrder().getId(), emailEx);
+                }
+            }
 
         } catch (Exception e) {
             log.error("[MPESA_SERVICE] handleMpesaCallback ERROR - Exception during callback processing", e);

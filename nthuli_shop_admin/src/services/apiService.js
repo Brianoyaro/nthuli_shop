@@ -9,6 +9,28 @@ const apiClient = axios.create({
   },
 });
 
+// Inject admin JWT on every request
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('adminToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// On 401, clear session and redirect to login
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // API Service for Products
 export const productAPI = {
   // Get all products grouped by category
@@ -79,6 +101,25 @@ export const categoryAPI = {
 
   // Delete category
   deleteCategory: (id) => apiClient.delete(`/api/category/${id}`),
+};
+
+// API Service for Orders (admin)
+export const orderAPI = {
+  // Get all orders
+  getAllOrders: () =>
+    apiClient.get('/api/orders/admin/all').then((r) => r.data.data),
+
+  // Get orders filtered by status
+  getOrdersByStatus: (status) =>
+    apiClient.get(`/api/orders/admin/status/${status}`).then((r) => r.data.data),
+
+  // Update an order's status
+  updateOrderStatus: (orderId, status) =>
+    apiClient.put(`/api/orders/${orderId}/status/${status}`).then((r) => r.data.data),
+
+  // Delete an order
+  deleteOrder: (orderId) =>
+    apiClient.delete(`/api/orders/${orderId}`).then((r) => r.data),
 };
 
 export default apiClient;

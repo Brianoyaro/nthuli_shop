@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts, useCategories } from '../hooks/useApi';
+import { useAuth } from '../context/AuthContext';
 import CategoryModal from './CategoryModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { data: products = {} } = useProducts();
   const { data: categories = [] } = useCategories();
 
@@ -56,12 +58,26 @@ export default function Dashboard() {
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            onClick={handleCreateProduct}
-            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-lg"
-          >
-            + New Product
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/orders')}
+              className="px-5 py-2.5 bg-blue-800 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow"
+            >
+              Orders
+            </button>
+            <button
+              onClick={handleCreateProduct}
+              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-lg"
+            >
+              + New Product
+            </button>
+            <button
+              onClick={() => { logout(); navigate('/login'); }}
+              className="px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition text-sm"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
         {/* Categories Section */}

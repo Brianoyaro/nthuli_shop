@@ -1,12 +1,15 @@
 package org.nthuli_shop.nthuli_shop.Authentication.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.Authentication.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user/")
+@Slf4j
 public class UserController {
 
     @Autowired
@@ -24,7 +28,7 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/profile")
-    public ResponseEntity<Map<String, Object>> profile() {
+    public ResponseEntity<?> profile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof User) {
@@ -38,7 +42,8 @@ public class UserController {
             profileData.put("last_login_ip", user.getLastLoginIp());
             profileData.put("created_at", user.getCreatedAt());
 
-            return ResponseEntity.ok(profileData);
+            log.warn("ProfileData: {}", profileData);
+            return ResponseEntity.status(HttpStatus.OK).body(profileData);
         }
         return ResponseEntity.status(401).build();
     }

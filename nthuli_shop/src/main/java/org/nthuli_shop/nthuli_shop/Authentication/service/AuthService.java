@@ -2,6 +2,7 @@ package org.nthuli_shop.nthuli_shop.Authentication.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.Authentication.dto.*;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.PasswordResetToken;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
@@ -35,15 +37,15 @@ public class AuthService {
     @Value("${app.frontend.base-url:http://localhost:5173}")
     private String frontendBaseUrl;
 
-    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder, CartService cartService, PasswordResetTokenRepository passwordResetTokenRepository, EmailService emailService) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.jwtService = jwtService;
-        this.passwordEncoder = passwordEncoder;
-        this.cartService = cartService;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
-        this.emailService = emailService;
-    }
+//    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder, CartService cartService, PasswordResetTokenRepository passwordResetTokenRepository, EmailService emailService) {
+//        this.authenticationManager = authenticationManager;
+//        this.userRepository = userRepository;
+//        this.jwtService = jwtService;
+//        this.passwordEncoder = passwordEncoder;
+//        this.cartService = cartService;
+//        this.passwordResetTokenRepository = passwordResetTokenRepository;
+//        this.emailService = emailService;
+//    }
 
     // register
     @Transactional
@@ -56,7 +58,7 @@ public class AuthService {
         User user = new User(
                 registerRequest.getEmail(),
                 passwordEncoder.encode(registerRequest.getPassword()),
-                registerRequest.getRole() != null ? registerRequest.getRole() : Role.USER
+                Role.USER
         );
 
         // add metadata
@@ -74,11 +76,12 @@ public class AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new AuthResponse(
-                accessToken,
-                refreshToken,
-                jwtService.getAccessTokenExpiration()
-        );
+        return AuthResponse.builder()
+                .id(user.getId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(jwtService.getAccessTokenExpiration())
+                .build();
     }
 
     public AuthResponse authenticate(@RequestBody AuthRequest authRequest, HttpServletRequest request) {
@@ -100,11 +103,12 @@ public class AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new AuthResponse(
-                accessToken,
-                refreshToken,
-                jwtService.getAccessTokenExpiration()
-        );
+        return AuthResponse.builder()
+                .id(user.getId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(jwtService.getAccessTokenExpiration())
+                .build();
     }
 
     // refresh access token
@@ -138,11 +142,13 @@ public class AuthService {
                         // generate access token only because refresh token is already passed as the function argument
                         String accessToken = jwtService.generateAccessToken(user);
 
-                        return new AuthResponse(
-                                accessToken,
-                                refreshToken,
-                                jwtService.getAccessTokenExpiration()
-                        );
+                        return AuthResponse.builder()
+                                .id(user.getId())
+                                .accessToken(accessToken)
+                                .refreshToken(refreshToken)
+                                .expiresIn(jwtService.getAccessTokenExpiration())
+                                .build();
+
                     }
                 }
             }

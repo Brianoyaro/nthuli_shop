@@ -1,5 +1,7 @@
 package org.nthuli_shop.nthuli_shop.Authentication.controller;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.nthuli_shop.nthuli_shop.Authentication.dto.*;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.PasswordResetToken;
 
@@ -12,13 +14,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth/")
+@RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     //
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+//    public AuthController(AuthService authService) {
+//        this.authService = authService;
+//    }
+
+
+
+
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest, HttpServletRequest httpServletRequest) {
@@ -44,8 +52,9 @@ public class AuthController {
         //
         try {
             AuthResponse authResponse = authService.authenticate(authRequest, httpServletRequest);
-            return ResponseEntity.ok(authResponse);
+            return ResponseEntity.status(HttpStatus.OK).body(authResponse);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Authentication failed. Invalid credentials."));
