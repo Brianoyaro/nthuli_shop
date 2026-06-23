@@ -32,13 +32,16 @@ export function PaymentSuccess() {
       try {
         setStatus('verifying');
         const result = await paymentsAPI.verifyPaystackTransaction(reference);
+        console.log('Payment verification result:', result);
 
         // Adjust checks here to match your backend's verify response shape
-        const ok =
-          (result && (result.status === 'success' || result.paymentStatus === 'COMPLETED')) ||
-          result?.success === true;
+        const ok = result?.success
+          // (result && (result.status.toLowerCase() === 'success' || result.paymentStatus?.toLowerCase() === 'completed')) ||
+          // result?.success === true;
 
         if (ok) {
+          console.log('Payment verified successfully:', result);
+          setStatus('success');
           // Clear client + server cart / checkout state
           try { await cartAPI.clearCart(); } catch (_) {}
           try { clearCart(); } catch (_) {}
@@ -61,7 +64,7 @@ export function PaymentSuccess() {
         showError(err?.message || 'Payment verification failed.');
       }
     })();
-  }, [location.search, clearCart, showSuccess, showError]);
+  }, [location.search, showSuccess, showError]);
 
   if (status === 'verifying') {
     return (

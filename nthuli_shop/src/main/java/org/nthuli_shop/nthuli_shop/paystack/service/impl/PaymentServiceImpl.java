@@ -54,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
                 order.getTotalAmount(),   // ✅ SOURCE OF TRUTH
                 reference
         );
-        log.debug("after payment initialisation, the returned url:{}, reference: {}", url, reference);
+        log.warn("after payment initialisation, the returned url:{}, reference: {}", url, reference);
         return PaymentResponseDto.builder()
                 .reference(reference)
                 .authorizationUrl(url)

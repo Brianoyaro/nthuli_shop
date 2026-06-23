@@ -2,6 +2,7 @@ package org.nthuli_shop.nthuli_shop.paystack.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaystackService {
 
     private final WebClient webClient;
@@ -42,18 +44,41 @@ public class PaystackService {
 
         payload.put("callback_url", "http://localhost:5173/payment/success");
 
-        Map response =
-                webClient.post()
-                        .uri(baseUrl + "/transaction/initialize")
-                        .header("Authorization", "Bearer " + secret)
-                        .bodyValue(payload)
-                        .retrieve()
-                        .bodyToMono(Map.class)
-                        .block();
+//        Map response =
+//                webClient.post()
+//                        .uri(baseUrl + "/transaction/initialize")
+//                        .header("Authorization", "Bearer " + secret)
+//                        .bodyValue(payload)
+//                        .retrieve()
+//                        .bodyToMono(Map.class)
+//                        .block();
+//
+//        Map data = (Map) response.get("data");
+//
+//        return (String) data.get("authorization_url");
+        try {
 
-        Map data = (Map) response.get("data");
+            Map response =
+                    webClient.post()
+                            .uri(baseUrl + "/transaction/initialize")
+                            .header("Authorization", "Bearer " + secret)
+                            .bodyValue(payload)
+                            .retrieve()
+                            .bodyToMono(Map.class)
+                            .block();
 
-        return (String) data.get("authorization_url");
+            log.info("Paystack response: {}", response);
+
+            Map data = (Map) response.get("data");
+
+            return (String) data.get("authorization_url");
+
+        } catch (Exception e) {
+
+            log.error("Paystack initialization failed", e);
+
+            throw e;
+        }
     }
 
     public Map verifyTransaction(String reference) {
