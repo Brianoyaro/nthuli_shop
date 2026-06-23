@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.nthuli_shop.nthuli_shop.Authentication.entity.User;
 import org.nthuli_shop.nthuli_shop.order.enums.OrderStatus;
-import org.nthuli_shop.nthuli_shop.payment.entity.Payment_Payment;
+import org.nthuli_shop.nthuli_shop.paystack.model.Payment;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -50,9 +50,9 @@ public class Order {
     @Column(name = "notes")
     private String notes;
 
-    // One-to-One mapping with Payment
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Payment_Payment paymentPayment;
+//    // One-to-One mapping with Payment
+//    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private Payment payment;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

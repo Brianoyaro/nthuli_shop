@@ -2,7 +2,8 @@ package org.nthuli_shop.nthuli_shop.paystack.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.nthuli_shop.nthuli_shop.payment.enums.PaymentMethod;
+import org.nthuli_shop.nthuli_shop.order.entity.Order;
+import org.nthuli_shop.nthuli_shop.paystack.enums.PaymentMethod;
 import org.nthuli_shop.nthuli_shop.paystack.enums.PaymentStatus;
 
 import java.math.BigDecimal;
@@ -25,6 +26,10 @@ public class Payment {
     private BigDecimal amount;
 
     private String email;
+
+//    @OneToOne
+//    @JoinColumn(name = "order_id")
+//    private Order order;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;

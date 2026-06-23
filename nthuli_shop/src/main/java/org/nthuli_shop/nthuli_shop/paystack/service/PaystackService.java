@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class PaystackService {
 
         payload.put("reference", reference);
 
-        payload.put("callback_url", "http://localhost:5173/");
+        payload.put("callback_url", "http://localhost:5173/payment/success");
 
         Map response =
                 webClient.post()
@@ -55,5 +54,15 @@ public class PaystackService {
         Map data = (Map) response.get("data");
 
         return (String) data.get("authorization_url");
+    }
+
+    public Map verifyTransaction(String reference) {
+
+        return  webClient.get()
+                .uri(baseUrl + "/transaction/verify/" + reference)
+                .header("Authorization", "Bearer " + secret)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
     }
 }

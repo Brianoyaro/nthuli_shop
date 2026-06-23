@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaSpinner, FaPhone, FaCreditCard, FaBuilding, FaCheckCircle, FaTimes } from 'react-icons/fa';
-import { useCart } from '../hooks/useCart';
-import { useAuth } from '../hooks/useAuth';
-import { useToast } from '../context/ToastContext';
-import { paymentsAPI } from '../services/paymentsAPI';
-import { orderAPI } from '../services/orderAPI';
-import { cartAPI } from '../services/cartAPI';
+import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../context/ToastContext';
+import { paymentsAPI } from '../../services/paymentsAPI';
+import { orderAPI } from '../../services/orderAPI';
+import { cartAPI } from '../../services/cartAPI';
 
 export function PaymentMethod() {
   const navigate = useNavigate();

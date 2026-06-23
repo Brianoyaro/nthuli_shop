@@ -7,6 +7,8 @@ import { FaArrowLeft, FaSpinner, FaMapMarkerAlt, FaFileAlt, FaCheckCircle, FaSho
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { orderAPI } from '../services/orderAPI';
+import { paymentsAPI } from '../services/paymentsAPI';
+
 
 // Validation schema - only shipping address and notes
 const checkoutSchema = z.object({
@@ -104,7 +106,28 @@ export function Checkout() {
       }));
       sessionStorage.setItem('pendingOrderId', String(orderId));
 
-      navigate('/checkout/payment');
+      // navigate('/checkout/payment');
+      const email = user?.email || '';
+      const paymentOrderId = orderId || sessionStorage.getItem('pendingOrderId');
+      const initResponse = await paymentsAPI.initPaystackTransaction(paymentOrderId, email);
+      
+      // Try multiple possible shapes for the authorization URL
+      const authorizationUrl = initResponse?.authorizationUrl || initResponse?.authorization_url || initResponse?.data?.authorization_url || initResponse?.data?.authorizationUrl || initResponse?.authorizationURL;
+      const reference = initResponse?.reference || initResponse?.data?.reference;
+
+      if (!authorizationUrl) {
+        console.error('Paystack init response:', initResponse);
+        throw new Error('Failed to obtain Paystack authorization URL from server');
+      }
+
+      // Persist reference so backend can correlate after redirect (if needed)
+      if (reference) {
+        sessionStorage.setItem('pendingPaymentReference', reference);
+      }
+
+      // Redirect the browser to Paystack's hosted payment page
+      window.location.href = authorizationUrl;
+      return;
     } catch (err) {
       console.error('❌ Checkout error:', err);
       setError(err.message || 'An error occurred. Please try again.');

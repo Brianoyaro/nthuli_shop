@@ -12,7 +12,7 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Cart } from './pages/Cart';
 import { OrderReview } from './pages/OrderReview';
 import { Checkout } from './pages/Checkout';
-import { PaymentMethod } from './pages/PaymentMethod';
+// import { PaymentMethod } from './pages/PaymentMethod';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { SearchResults } from './pages/SearchResults';
@@ -22,7 +22,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { Orders } from './pages/Orders';
 import { Profile } from './pages/Profile';
-// import { PaymentSuccess } from './pages/PaymentSuccess';
+import { PaymentSuccess } from './pages/PaymentSuccess';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,7 +45,7 @@ function App() {
                 <Navbar />
               <main className="flex-grow">
                 <Routes>
-                  {/* <Route path="/payment/success" element={<PaymentSuccess />} /> */}
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
                   <Route path="/" element={<Home />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
@@ -71,14 +71,14 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
+                  {/* <Route
                     path="/checkout/payment"
                     element={
                       <ProtectedRoute>
                         <PaymentMethod />
                       </ProtectedRoute>
                     }
-                  />
+                  /> */}
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route
